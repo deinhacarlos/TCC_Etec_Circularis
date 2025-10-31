@@ -1,0 +1,43 @@
+.
+├── API_ENDPOINTS.md
+├── ESTRUTURA_PROJETO.txt
+├── README.md
+├── database.sql
+├── package.json
+├── server.js
+└── src
+    ├── app.js
+    ├── config
+    │   ├── db.js
+    │   └── socketHandler.js
+    ├── controllers
+    │   ├── chatController.js
+    │   ├── denunciaController.js
+    │   ├── materialController.js
+    │   ├── mensagemController.js
+    │   ├── notificacaoController.js
+    │   ├── recomendacaoController.js
+    │   ├── trocaController.js
+    │   └── usuarioController.js
+    ├── middlewares
+    │   └── authMiddleware.js
+    ├── routes
+    │   ├── chatRoutes.js
+    │   ├── denunciaRoutes.js
+    │   ├── materialRoutes.js
+    │   ├── mensagemRoutes.js
+    │   ├── notificacaoRoutes.js
+    │   ├── recomendacaoRoutes.js
+    │   ├── trocaRoutes.js
+    │   └── usuarioRoutes.js
+    └── services
+        ├── chatService.js
+        ├── denunciaService.js
+        ├── materialService.js
+        ├── mensagemService.js
+        ├── notificacaoService.js
+        ├── recomendacaoService.js
+        ├── trocaService.js
+        └── usuarioService.js
+
+6 directories, 34 files
