@@ -2,19 +2,27 @@ import usuarioService from '../services/usuarioService.js';
 
 async function cadastrarUsuario(req, res) {
   try {
-    const resultado = await usuarioService.cadastrarUsuario(req.body);
-    return res.status(201).json({
+    const { NomeCompleto, Email, Senha, Telefone } = req.body;
+    const FotoPerfil = req.file ? req.file.filename : null; // pegar nome do arquivo
+
+    // Passar para service para salvar no banco
+    const resultado = await usuarioService.cadastrarUsuario({
+      NomeCompleto,
+      Email,
+      Senha,
+      Telefone,
+      FotoPerfil
+    });
+
+    res.status(201).json({
       message: 'Usuário cadastrado com sucesso!',
       userId: resultado.id
     });
   } catch (error) {
-    console.error("ERRO NO CONTROLLER (cadastrarUsuario):", error.message);
-    return res.status(500).json({
-      message: "Erro interno do servidor ao tentar cadastrar.",
-      erro: error.message
-    });
+    res.status(500).json({ message: 'Erro ao cadastrar usuário.', erro: error.message });
   }
 }
+
 
 async function loginUsuario(req, res) {
   try {

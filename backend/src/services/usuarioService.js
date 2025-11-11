@@ -14,9 +14,13 @@ async function cadastrarUsuario(dados) {
     const [resultado] = await pool.query(
       'INSERT INTO Usuario (Nome_Completo, Email, Telefone, Senha, DataNascimento, Endereco, FotoPerfil, Tipo_Usuario, Status, DataCadastro, PontosRanking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
-        Nome_Completo, Email, Telefone, senhaCriptografada, 
-        null, null, null, 'comum', 1, new Date(), 0
+        NomeCompleto, Email, Telefone, senhaCriptografada,
+        null,         // DataNascimento
+        null,         // Endereco
+        FotoPerfil,   // FotoPerfil, aqui vem o nome do arquivo!
+        'comum', 1, new Date(), 0
       ]
+
     );
     return { id: resultado.insertId };
   } catch (error) {
@@ -118,7 +122,7 @@ async function atualizarUsuario(id, dadosParaAtualizar) {
     campos.push('PontosRanking = ?');
     valores.push(PontosRanking);
   }
-  
+
   if (campos.length === 0) {
     throw new Error('Nenhum dado válido fornecido para atualização.');
   }
@@ -254,7 +258,7 @@ async function excluirUsuarioPermanente(id) {
   try {
     // Verificar se o usuário existe
     const [userCheck] = await pool.query('SELECT Id_Usuario FROM Usuario WHERE Id_Usuario = ?', [id]);
-    
+
     if (userCheck.length === 0) {
       throw new Error('Usuário não encontrado.');
     }
@@ -286,12 +290,12 @@ async function excluirUsuarioPermanente(id) {
 
   } catch (error) {
     console.error("ERRO NO SERVICE (excluirUsuarioPermanente):", error);
-    
+
     // Tratamento específico para constraints de FK
     if (error.code === 'ER_ROW_IS_REFERENCED_2') {
       throw new Error('Não é possível excluir usuário com registros relacionados. Use a desativação.');
     }
-    
+
     throw new Error(error.message || "Erro ao excluir usuário do banco de dados.");
   }
 }

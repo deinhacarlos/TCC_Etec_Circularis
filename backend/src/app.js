@@ -11,6 +11,8 @@ import mensagemRoutes from './routes/mensagemRoutes.js';
 
 const app = express();
 
+app.use('/uploads', express.static('uploads'));
+
 // Middlewares globais
 app.use(cors());
 app.use(express.json());

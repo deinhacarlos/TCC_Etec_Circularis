@@ -1,13 +1,13 @@
 import express from 'express';
 import usuarioController from '../controllers/usuarioController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import upload from '../config/multerConfig.js'; 
 
 const router = express.Router();
 
 // --- Rotas Públicas (não exigem autenticação) ---
-router.post('/cadastro', usuarioController.cadastrarUsuario);
+router.post('/cadastro', upload.single('FotoPerfil'), usuarioController.cadastrarUsuario);
 router.post('/login', usuarioController.loginUsuario);
-
 
 // --- Rotas Públicas Recuperação de senha 
 router.post('/esqueci-senha', usuarioController.solicitarRecuperacaoSenha);
