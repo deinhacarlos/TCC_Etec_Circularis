@@ -54,6 +54,20 @@ async function buscarPorId(req, res) {
     });
   }
 }
+ // Listar usuários
+
+async function listarUsuarios(req, res) {
+  try {
+    const usuarios = await usuarioService.listarUsuarios();
+    return res.status(200).json(usuarios);
+  } catch (error) {
+    console.error("ERRO NO CONTROLLER (listarUsuarios):", error.message);
+    return res.status(500).json({
+      message: "Erro interno ao listar usuários.",
+      erro: error.message
+    });
+  }
+}
 
 // Atualizar dados do usuário
 async function atualizarUsuario(req, res) {
@@ -283,6 +297,7 @@ const usuarioController = {
   cadastrarUsuario,
   loginUsuario,
   buscarPorId,
+  listarUsuarios,
   atualizarUsuario,
   atualizarSenha,
   solicitarRecuperacaoSenha,

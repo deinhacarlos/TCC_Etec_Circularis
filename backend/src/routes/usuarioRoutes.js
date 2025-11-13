@@ -9,10 +9,13 @@ const router = express.Router();
 router.post('/cadastro', upload.single('FotoPerfil'), usuarioController.cadastrarUsuario);
 router.post('/login', usuarioController.loginUsuario);
 
+
+
 // --- Rotas Públicas Recuperação de senha 
 router.post('/esqueci-senha', usuarioController.solicitarRecuperacaoSenha);
 router.post('/redefinir-senha/:token', usuarioController.redefinirSenha);
 router.get('/validar-token/:token', usuarioController.validarToken);
+
 
 // --- Rotas Protegidas (exigem autenticação JWT) ---
 
@@ -24,12 +27,15 @@ router.get('/perfil', authMiddleware, (req, res) => {
   });
 });
 
-// 🔹 Rotas específicas com parâmetros (devem vir primeiro)
+// Rota para Listar usuários
+router.get('/', authMiddleware, usuarioController.listarUsuarios);
+
+// Rotas específicas com parâmetros (devem vir primeiro)
 router.patch('/:id/senha', authMiddleware, usuarioController.atualizarSenha);
 router.patch('/:id/reativar', authMiddleware, usuarioController.reativarUsuario);
 router.delete('/:id/permanente', authMiddleware, usuarioController.excluirUsuarioPermanente);
 
-// 🔹 Rotas genéricas com parâmetros (devem vir depois)
+// Rotas genéricas com parâmetros (devem vir depois)
 router.get('/:id', authMiddleware, usuarioController.buscarPorId);
 router.put('/:id', authMiddleware, usuarioController.atualizarUsuario);
 router.delete('/:id', authMiddleware, usuarioController.desativarUsuario);

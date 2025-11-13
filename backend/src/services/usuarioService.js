@@ -79,6 +79,20 @@ async function buscarUsuarioPorId(id) {
   }
 }
 
+// Listar Usuários
+async function listarUsuarios() {
+  try {
+    const [rows] = await pool.query(
+      'SELECT Id_Usuario, Nome_Completo, Email, Telefone, DataNascimento, Endereco, FotoPerfil, Tipo_Usuario, Status, DataCadastro, PontosRanking FROM Usuario'
+    );
+    return rows;
+  } catch (error) {
+    console.error("ERRO NO SERVICE (listarUsuarios):", error);
+    throw new Error("Erro ao listar usuários no banco de dados.");
+  }
+}
+
+
 async function atualizarUsuario(id, dadosParaAtualizar) {
   const { Nome_Completo, Email, Telefone, DataNascimento, Endereco, FotoPerfil, Tipo_Usuario, Status, PontosRanking } = dadosParaAtualizar;
 
@@ -308,7 +322,8 @@ const usuarioService = {
   atualizarSenha,
   desativarUsuario,
   reativarUsuario,
-  excluirUsuarioPermanente
+  excluirUsuarioPermanente,
+  listarUsuarios
 };
 
 export default usuarioService;
