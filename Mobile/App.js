@@ -1,26 +1,27 @@
-// Importações principais do projeto (Expo e React Native)
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as Font from 'expo-font';
+import AppLoading from 'expo-app-loading';
+import HomeScreen from './screens/HomeScreen';
 
-// Função principal do App que será renderizada em tela
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'Caprasimo': require('./assets/fonts/Caprasimo-Regular.ttf'),
+    'WorkSans': require('./assets/fonts/WorkSans-Regular.ttf'),
+  });
+};
+
 export default function App() {
+  const [fontsLoaded, setFontsLoaded] = React.useState(false);
+
+  if (!fontsLoaded) {
+    return <AppLoading startAsync={fetchFonts} onFinish={() => setFontsLoaded(true)} onError={console.warn} />;
+  }
+
   return (
-    // View é o container principal, equivalente a uma div na web
-    <View style={styles.container}>
-      {/* Exibe um texto orientativo para o usuário */}
-      <Text>Open up App.js to start working on your app!</Text>
-      {/* Componente de StatusBar do Expo */}
+    <>
+      <HomeScreen />
       <StatusBar style="auto" />
-    </View>
+    </>
   );
 }
-
-// Estilos para os componentes, feito com o StyleSheet do React Native
-const styles = StyleSheet.create({
-  container: {
-    flex: 1, // Usa toda a área disponível na tela
-    backgroundColor: '#fff', // Fundo branco
-    alignItems: 'center', // Centraliza horizontalmente
-    justifyContent: 'center', // Centraliza verticalmente
-  },
-});
