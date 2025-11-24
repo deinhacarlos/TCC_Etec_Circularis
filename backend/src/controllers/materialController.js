@@ -2,18 +2,29 @@ import materialService from '../services/materialService.js';
 
 async function cadastrarMaterial(req, res) {
   try {
-    const resultado = await materialService.cadastrarMaterial(req.body);
+    // Junta dados do body com campo da imagem salvo pelo multer
+    const dados = {
+      ...req.body,
+      Imagem: req.file ? req.file.filename || req.file.originalname || null : null, // depende de como salva (buffer ou local)
+    };
+
+    // Se o id do usuário for enviado como string (do localStorage) e precisa de número, converta:
+    if (dados.IdUsuarioFK && typeof dados.IdUsuarioFK === 'string') {
+      dados.IdUsuarioFK = parseInt(dados.IdUsuarioFK);
+    }
+
+    const resultado = await materialService.cadastrarMaterial(dados);
+
     return res.status(201).json({
       message: 'Material cadastrado com sucesso!',
       materialId: resultado.id,
     });
   } catch (error) {
     console.error("ERRO NO CONTROLLER (cadastrarMaterial):", error.message);
-    
+
     if (error.message.includes('são obrigatórios')) {
       return res.status(400).json({ message: error.message });
     }
-    
     return res.status(500).json({
       message: "Erro interno do servidor ao tentar cadastrar material.",
       erro: error.message

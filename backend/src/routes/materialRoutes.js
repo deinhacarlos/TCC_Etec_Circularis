@@ -2,24 +2,26 @@ import express from 'express';
 import materialController from '../controllers/materialController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
+// 1. Importe o multer
+import multer from 'multer';
+const upload = multer(); // usando memória padrão, ajuste se quiser salvar arquivos no disco/local
+
 const router = express.Router();
 
 // --- Rotas Públicas ---
-// Rota para listar materiais (sem autenticação para permitir navegação livre)
 router.get('/', materialController.listarMateriais);
-
-// Rota para buscar material específico (sem autenticação para permitir visualização)
 router.get('/:id', materialController.buscarPorId);
 
 // --- Rotas Protegidas (exigem autenticação JWT) ---
+// 2. Insira upload.single('Imagem') ANTES do controller
+router.post(
+  '/',
+  authMiddleware,
+  upload.single('Imagem'),   // <-- ESSENCIAL para multipart/form-data do frontend
+  materialController.cadastrarMaterial
+);
 
-// Rota para cadastrar novo material
-router.post('/', authMiddleware, materialController.cadastrarMaterial);
-
-// Rotas específicas (devem vir antes das genéricas)
 router.patch('/:id/disponibilidade', authMiddleware, materialController.alterarDisponibilidade);
-
-// Rotas genéricas
 router.put('/:id', authMiddleware, materialController.atualizarMaterial);
 router.delete('/:id', authMiddleware, materialController.excluirMaterial);
 
