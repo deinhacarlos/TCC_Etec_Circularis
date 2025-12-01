@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Cadastrar Material - Circularis</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Nunito:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+  <!-- CSS externo da página -->
+ <link rel="stylesheet" href="styles.css/global.css"><link rel="stylesheet" href="styles.css/cadastrar-material.css">
+</head>
+
+<body>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="header">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <!-- Logo -->
+        <div class="col-6 col-md-3">
+          <a href="busca.html" class="logo d-flex align-items-center">
+            <img src="assets/logo.png" alt="Logo Circularis" class="logo-icon">
+            <span>CIRCULARIS</span>
+          </a>
+        </div>
+
+        <!-- Menu e Ações -->
+        <div class="col-auto ms-auto me-4">
+          <div class="d-flex justify-content-end align-items-center gap-3">
+            <ul class="nav-menu d-none d-md-flex">
+              <li><a href="busca.html">Início</a></li>
+              <li><a href="chat.html">Chat</a></li>
+              <li><a href="cadastrarmaterial.html" class="active">Cadastrar Livros</a></li>
+              <li><a href="perfil.html">Perfil</a></li>
+            </ul>
+
+            <!-- Notificações Dropdown -->
+            <div class="notification-container">
+              <div class="notification-icon" id="notificationIcon">
+                <i class="bi bi-bell"></i>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+              </div>
+              <div class="notification-dropdown" id="notificationDropdown">
+                <div class="notification-header">
+                  <button class="btn-mark-read" id="markAllRead" style="display: none;">Marcar todas como lidas</button>
+                </div>
+                <div class="notification-body" id="notificationBody"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
+  <section class="cadastro-container">
+    <div class="form-wrapper">
+
+      <!-- Título + texto -->
+      <h2 class="titulo-pagina">Cadastrar novo material</h2>
+      <p class="subtitulo-pagina">
+        Preencha os detalhes para disponibilizar <strong>livros, mochilas, estojos, coleções, kits escolares</strong> e
+        outros itens escolares usados para troca.
+      </p>
+
+      <!-- ==================== FORMULÁRIO ==================== -->
+      <form id="materialForm">
+        <!-- Tipo do material -->
+        <label class="form-label mt-1" for="tipoMaterial">Tipo de Material</label>
+        <select id="tipoMaterial" class="form-select" required>
+          <option value="">Selecione...</option>
+          <option value="Livro">Livro</option>
+          <option value="Mochila">Mochila</option>
+          <option value="Estojo">Estojo</option>
+          <option value="Kit escolar">Kit escolar</option>
+          <option value="Coleção de lápis">Coleção de lápis</option>
+          <option value="Caderno">Caderno</option>
+          <option value="Outro">Outro</option>
+        </select>
+        <div id="tipoError" class="error-message"></div>
+
+        <!-- Título -->
+        <label class="form-label mt-3" for="tituloMaterial">Nome do Material</label>
+        <input id="tituloMaterial" type="text" class="form-control" placeholder="Exemplo: Mochila Spider-Man usada">
+        <div id="tituloError" class="error-message"></div>
+
+        <!-- Autor -->
+        <label class="form-label mt-3" for="autorMaterial">Autor / Marca (opcional)</label>
+        <input id="autorMaterial" type="text" class="form-control"
+          placeholder="Exemplo: George R.R. Martin, Faber-Castell, Tilibra">
+
+        <!-- Gênero/Categoria -->
+        <label class="form-label mt-3" for="categoriaMaterial">Categoria/Detalhe (opcional)</label>
+        <input id="categoriaMaterial" type="text" class="form-control"
+          placeholder="Fantasia, Estojo plástico, Mochila juvenil...">
+        <label class="form-label mt-3" for="estadoConservacao">Estado de Conservação</label>
+        <select id="estadoConservacao" class="form-select" required>
+          <option value="">Selecione...</option>
+          <option value="Novo">Novo</option>
+          <option value="Bom">Bom</option>
+          <option value="Regular">Regular</option>
+          <option value="Ruim">Ruim</option>
+        </select>
+        <div id="conservacaoError" class="error-message"></div>
+        <!-- Descrição -->
+        <label class="form-label mt-3" for="descricaoMaterial">Descrição Breve</label>
+        <textarea id="descricaoMaterial" class="form-control textarea-desc" rows="4"
+          placeholder="Descreva o estado geral, detalhes, tamanho, etc."></textarea>
+
+        <!-- Localização (3 colunas) -->
+<div class="row gx-5 gy-3 mt-2">
+          
+          <div class="col-md-8">
+            <label class="form-label" for="cidadeMaterial">Cidade</label>
+            <input id="cidadeMaterial" type="text" class="form-control" placeholder="Ex: São Paulo" required>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label" for="estadoMaterial">Estado (UF)</label>
+            <select id="estadoMaterial" class="form-select" required>
+              <option value="">UF</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AP">AP</option>
+              <option value="AM">AM</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MT">MT</option>
+              <option value="MS">MS</option>
+              <option value="MG">MG</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PR">PR</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RS">RS</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="SC">SC</option>
+              <option value="SP">SP</option>
+              <option value="SE">SE</option>
+              <option value="TO">TO</option>
+            </select>
+            <div id="estadoError" class="error-message"></div>
+          </div>
+
+        </div>
+        <!-- Upload -->
+        <label class="form-label mt-4" for="fileInput">Imagem</label>
+        <div class="upload-area">
+          <input type="file" id="fileInput" accept="image/*" style="display: none;">
+          <i class="bi bi-cloud-arrow-up upload-icon"></i>
+          <p>Arraste e solte o arquivo aqui ou</p>
+          <button type="button" class="btn-select" id="btnSelectFile">Selecionar Imagem</button>
+          <small class="text-muted d-block mt-2">Formatos suportados: JPG, PNG, GIF, WebP (Max 5MB)</small>
+          <div id="imagemError" class="error-message"></div>
+        </div>
+
+        <!-- Botão Final -->
+        <button type="submit" class="btn-cadastrar-livro mt-4">Cadastrar</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Script do cadastro de material -->
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/cadastro-material-script.js?v=123"></script>
+  
+
+
+
+</body>
+
+</html>

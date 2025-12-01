@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Circularis</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Nunito:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="styles.css/global.css">
+    <link rel="stylesheet" href="styles.css/chat.css">
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <div class="col-6 col-md-3">
+          <a href="busca.html" class="logo d-flex align-items-center">
+            <img src="assets/logo.png" alt="Logo Circularis" class="logo-icon">
+            <span>CIRCULARIS</span>
+          </a>
+        </div>
+
+        <div class="col-auto ms-auto me-4">
+          <div class="d-flex justify-content-end align-items-center gap-3">
+            <ul class="nav-menu d-none d-md-flex">
+              <li><a href="busca.html">Início</a></li>
+              <li><a href="chat.html" class="active">Chat</a></li>
+              <li><a href="cadastrarmaterial.html">Cadastrar Livro</a></li>
+              <li><a href="perfil.html">Perfil</a></li>
+            </ul>
+
+            <div class="notification-container">
+              <div class="notification-icon" id="notificationIcon">
+                <i class="bi bi-bell"></i>
+                <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+              </div>
+              <div class="notification-dropdown" id="notificationDropdown">
+                <div class="notification-header">
+                  <button class="btn-mark-read" id="markAllRead" style="display: none;">Marcar todas como lidas</button>
+                </div>
+                <div class="notification-body" id="notificationBody"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+    <main class="chat-layout">
+        <aside class="chat-sidebar" id="chatSidebar">
+            <h3 class="sidebar-title">Conversas Recentes</h3>
+            
+            <div class="conversations-list" id="conversationsList">
+                </div>
+
+            <button class="btn-voltar" onclick="window.location.href='busca.html'">
+                <i class="bi bi-box-arrow-left"></i><span>Voltar</span>
+            </button>
+        </aside>
+
+        <section class="chat-area" id="chatArea">
+            <div class="chat-header" id="chatHeader" style="display: none;">
+                <img src="" alt="Avatar" class="chat-avatar" id="chatAvatar">
+                <h4 class="chat-name" id="chatName"></h4>
+            </div>
+
+            <div class="chat-messages" id="chatMessagesArea"></div>
+
+            <div class="chat-input" id="chatInput" style="display: none;">
+                <input type="text" class="message-input" id="messageInput" placeholder="Digite sua mensagem...">
+                <button class="send-btn" id="sendBtn"><i class="bi bi-send-fill"></i></button>
+            </div>
+        </section>
+    </main>
+
+    <div class="empty-modal-overlay" id="emptyModalOverlay">
+        <div class="empty-modal">
+            <button class="modal-close-btn" id="modalCloseBtn"><i class="bi bi-x-lg"></i></button>
+            <div class="modal-icon"><i class="bi bi-chat-square-quote"></i></div>
+            <h3 class="modal-title">Nenhuma conversa ativa</h3>
+            <p class="modal-text">
+                O chat só é liberado quando há uma negociação em andamento.<br>
+                Para iniciar, clique em <strong>"Propor Troca"</strong> no material de outro usuário.
+            </p>
+            <a href="busca.html" class="btn btn-primary mt-4" style="background: #6C63FF; border:none; padding: 10px 30px; border-radius: 25px; text-decoration: none; color: white; font-weight: bold;">
+                Buscar Materiais
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/chat-script.js"></script>
+</body>
+</html>
