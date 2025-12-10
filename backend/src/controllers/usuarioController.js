@@ -2,27 +2,50 @@ import usuarioService from '../services/usuarioService.js';
 
 async function cadastrarUsuario(req, res) {
   try {
-    const { NomeCompleto, Email, Senha, Telefone } = req.body;
-    const FotoPerfil = req.file ? req.file.filename : null; // pegar nome do arquivo
+    const { Nome, Email, Senha } = req.body;
+    const FotoPerfil = req.file ? req.file.filename : null;
 
-    // Passar para service para salvar no banco
     const resultado = await usuarioService.cadastrarUsuario({
-      NomeCompleto,
+      NomeCompleto: Nome,
       Email,
       Senha,
-      Telefone,
       FotoPerfil
     });
 
     res.status(201).json({
-      message: 'Usuário cadastrado com sucesso!',
+      message: 'Cadastro realizado! Verifique seu e-mail para ativar a conta.', // MENSAGEM ATUALIZADA
       userId: resultado.id
     });
   } catch (error) {
+    console.error("ERRO NO CONTROLLER (cadastrarUsuario):", error.message);
+    if (error.message.includes('E-mail já cadastrado')) {
+      return res.status(409).json({ message: "E-mail já cadastrado.", error: error.message });
+    }
     res.status(500).json({ message: 'Erro ao cadastrar usuário.', erro: error.message });
   }
 }
 
+// NOVA FUNÇÃO
+async function confirmarConta(req, res) {
+  try {
+    // Espera receber o token via Query String: /confirmar-conta?token=ABC...
+    const { token } = req.query; 
+    
+    if (!token) {
+      return res.status(400).json({ message: "Token de confirmação não fornecido." });
+    }
+
+    const resultado = await usuarioService.confirmarConta(token);
+    
+    return res.status(200).json(resultado);
+  } catch (error) {
+    console.error("ERRO NO CONTROLLER (confirmarConta):", error.message);
+    return res.status(400).json({ 
+      message: "Não foi possível confirmar a conta.", 
+      erro: error.message 
+    });
+  }
+}
 
 async function loginUsuario(req, res) {
   try {
@@ -30,6 +53,22 @@ async function loginUsuario(req, res) {
     return res.status(200).json(resultado);
   } catch (error) {
     console.error("ERRO NO CONTROLLER (loginUsuario):", error.message);
+    
+    // Tratamento para conta não confirmada
+    if (error.message.includes('confirme seu e-mail')) {
+      return res.status(403).json({ // 403 Forbidden
+        message: "Conta inativa. Verifique seu e-mail.",
+        error: error.message
+      });
+    }
+
+    if (error.message.includes('Credenciais inválidas') || error.message.includes('Senha incorreta') || error.message.includes('Usuário não encontrado')) {
+      return res.status(401).json({
+        message: "E-mail ou senha incorretos.",
+        error: error.message
+      });
+    }
+
     return res.status(500).json({
       message: "Erro interno do servidor ao tentar fazer login.",
       erro: error.message
@@ -37,24 +76,35 @@ async function loginUsuario(req, res) {
   }
 }
 
-// Buscar usuário por ID
 async function buscarPorId(req, res) {
   try {
     const { id } = req.params; 
+    
+    // Verificação rigorosa do ID
+    if (!id || id === 'undefined' || id === 'null') {
+        return res.status(400).json({ message: "ID de usuário inválido." });
+    }
+
     const usuario = await usuarioService.buscarUsuarioPorId(id);
+    
+    // Se o serviço retornar vazio (o que não deveria acontecer pois ele lança erro, mas por segurança)
+    if (!usuario) {
+        return res.status(404).json({ message: "Usuário não encontrado no banco de dados." });
+    }
+
     return res.status(200).json(usuario);
+
   } catch (error) {
     console.error("ERRO NO CONTROLLER (buscarPorId):", error.message);
+    
+    // Tratamento específico para usuário não encontrado
     if (error.message === 'Usuário não encontrado.') {
       return res.status(404).json({ message: error.message });
     }
-    return res.status(500).json({
-      message: "Erro interno do servidor ao buscar usuário.",
-      erro: error.message
-    });
+    
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
   }
 }
- // Listar usuários
 
 async function listarUsuarios(req, res) {
   try {
@@ -62,239 +112,147 @@ async function listarUsuarios(req, res) {
     return res.status(200).json(usuarios);
   } catch (error) {
     console.error("ERRO NO CONTROLLER (listarUsuarios):", error.message);
-    return res.status(500).json({
-      message: "Erro interno ao listar usuários.",
-      erro: error.message
-    });
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
   }
 }
 
-// Atualizar dados do usuário
 async function atualizarUsuario(req, res) {
   try {
-    const { id } = req.params; 
+    const id = req.params.id;
     const dadosParaAtualizar = req.body;
-    if (dadosParaAtualizar.FotoPerfil && dadosParaAtualizar.FotoPerfil.trim() === "") {
-      return res.status(400).json({ message: "Foto do perfil é obrigatória." });
+
+    if ("FotoPerfil" in dadosParaAtualizar && dadosParaAtualizar.FotoPerfil.trim() === "") {
+      delete dadosParaAtualizar.FotoPerfil;
     }
+
     const resultado = await usuarioService.atualizarUsuario(id, dadosParaAtualizar);
     return res.status(200).json(resultado);
   } catch (error) {
-    console.error("ERRO NO CONTROLLER (atualizarUsuario):", error.message);
-    if (error.message.includes('Usuário não encontrado')) {
+    console.error("ERRO NO CONTROLLER atualizarUsuario:", error.message);
+    if (error.message.includes("Usurio no encontrado"))
       return res.status(404).json({ message: error.message });
-    }
-    return res.status(500).json({
-      message: "Erro interno do servidor ao tentar atualizar.",
-      erro: error.message
-    });
+    return res.status(500).json({ message: "Erro interno.", error: error.message });
   }
 }
 
-// Atualizar senha (usuário autenticado)
+async function atualizarFoto(req, res) {
+  try {
+    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ message: "Nenhuma imagem foi enviada." });
+    }
+    const novaFoto = req.file.filename;
+    const resultado = await usuarioService.atualizarUsuario(id, { FotoPerfil: novaFoto });
+    return res.status(200).json({ message: "Foto atualizada!", foto: novaFoto, resultado });
+  } catch (error) {
+    console.error("ERRO NO CONTROLLER (atualizarFoto):", error.message);
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
+  }
+}
+
 async function atualizarSenha(req, res) {
   try {
     const { id } = req.params;
     const { senhaAtual, novaSenha } = req.body;
-    
     const resultado = await usuarioService.atualizarSenha(id, senhaAtual, novaSenha);
-    
     return res.status(200).json(resultado);
   } catch (error) {
     console.error("ERRO NO CONTROLLER (atualizarSenha):", error.message);
-    
-    if (error.message.includes('Usuário não encontrado')) {
-      return res.status(404).json({ message: error.message });
-    }
-    if (error.message.includes('Senha atual incorreta') || 
-        error.message.includes('senha deve ter pelo menos')) {
-      return res.status(400).json({ message: error.message });
-    }
-    
-    return res.status(500).json({
-      message: "Erro interno do servidor ao tentar atualizar senha.",
-      erro: error.message
-    });
+    if (error.message.includes('Usuário não encontrado')) return res.status(404).json({ message: error.message });
+    if (error.message.includes('Senha atual incorreta') || error.message.includes('senha deve ter pelo menos')) return res.status(400).json({ message: error.message });
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
   }
 }
 
-// Solicitar recuperação de senha (envia email)
 async function solicitarRecuperacaoSenha(req, res) {
   try {
     const { email } = req.body;
-    
-    // Validação básica
-    if (!email || email.trim() === '') {
-      return res.status(400).json({ 
-        message: "Email é obrigatório." 
-      });
-    }
+    if (!email || email.trim() === '') { return res.status(400).json({ message: "Email é obrigatório." }); }
     
     await usuarioService.solicitarRecuperacaoSenha(email);
     
-    // Por segurança, sempre retorna sucesso mesmo se email não existir
-    // (evita que atacantes descubram emails cadastrados)
-    return res.status(200).json({
-      message: "Se o email estiver cadastrado, você receberá instruções para redefinir sua senha."
-    });
+    return res.status(200).json({ message: "Se o email estiver cadastrado, você receberá instruções para redefinir sua senha." });
   } catch (error) {
     console.error("ERRO NO CONTROLLER (solicitarRecuperacaoSenha):", error.message);
-    
-    // Por segurança, não revela se houve erro específico
-    return res.status(200).json({
-      message: "Se o email estiver cadastrado, você receberá instruções para redefinir sua senha."
-    });
+    return res.status(200).json({ message: "Se o email estiver cadastrado, você receberá instruções para redefinir sua senha." });
   }
 }
 
-// Redefinir senha com token (recebido por email)
 async function redefinirSenha(req, res) {
   try {
     const { token } = req.params;
     const { novaSenha } = req.body;
     
-    // Validação básica
-    if (!novaSenha || novaSenha.trim() === '') {
-      return res.status(400).json({ 
-        message: "Nova senha é obrigatória." 
-      });
-    }
+    if (!novaSenha || novaSenha.trim() === '') { return res.status(400).json({ message: "Nova senha é obrigatória." }); }
     
     const resultado = await usuarioService.redefinirSenha(token, novaSenha);
-    
     return res.status(200).json(resultado);
   } catch (error) {
     console.error("ERRO NO CONTROLLER (redefinirSenha):", error.message);
-    
-    if (error.message.includes('Token inválido') || 
-        error.message.includes('Token expirado') ||
-        error.message.includes('não encontrado')) {
-      return res.status(400).json({ 
-        message: "Token inválido ou expirado. Solicite uma nova recuperação de senha." 
-      });
+    if (error.message.includes('Token inválido') || error.message.includes('Token expirado') || error.message.includes('não encontrado')) {
+      return res.status(400).json({ message: "Token inválido ou expirado." });
     }
-    
-    if (error.message.includes('senha deve ter pelo menos')) {
-      return res.status(400).json({ message: error.message });
-    }
-    
-    return res.status(500).json({
-      message: "Erro interno do servidor ao tentar redefinir senha.",
-      erro: error.message
-    });
+    if (error.message.includes('senha deve ter pelo menos')) { return res.status(400).json({ message: error.message }); }
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
   }
 }
 
-// Validar token de recuperação (antes de redefinir)
 async function validarToken(req, res) {
   try {
     const { token } = req.params;
-    
     await usuarioService.validarTokenRecuperacao(token);
-    
-    return res.status(200).json({
-      valido: true,
-      message: "Token válido."
-    });
+    return res.status(200).json({ valido: true, message: "Token válido." });
   } catch (error) {
     console.error("ERRO NO CONTROLLER (validarToken):", error.message);
-    
-    if (error.message.includes('Token inválido') || 
-        error.message.includes('Token expirado') ||
-        error.message.includes('não encontrado')) {
-      return res.status(400).json({ 
-        valido: false,
-        message: "Token inválido ou expirado." 
-      });
+    if (error.message.includes('Token inválido') || error.message.includes('Token expirado') || error.message.includes('não encontrado')) {
+      return res.status(400).json({ valido: false, message: "Token inválido ou expirado." });
     }
-    
-    return res.status(500).json({
-      valido: false,
-      message: "Erro interno do servidor ao validar token.",
-      erro: error.message
-    });
+    return res.status(500).json({ valido: false, message: "Erro interno.", erro: error.message });
   }
 }
 
-// Desativar usuário (soft delete)
 async function desativarUsuario(req, res) {
   try {
     const { id } = req.params;
-    
     const resultado = await usuarioService.desativarUsuario(id);
-    
     return res.status(200).json(resultado);
   } catch (error) {
     console.error("ERRO NO CONTROLLER (desativarUsuario):", error.message);
-    
-    if (error.message.includes('Usuário não encontrado')) {
-      return res.status(404).json({ message: error.message });
-    }
-    if (error.message.includes('já está desativado')) {
-      return res.status(400).json({ message: error.message });
-    }
-    
-    return res.status(500).json({
-      message: "Erro interno do servidor ao tentar desativar usuário.",
-      erro: error.message
-    });
+    if (error.message.includes('Usuário não encontrado')) return res.status(404).json({ message: error.message });
+    if (error.message.includes('já está desativado')) return res.status(400).json({ message: error.message });
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
   }
 }
 
-// Reativar usuário
 async function reativarUsuario(req, res) {
   try {
     const { id } = req.params;
-    
     const resultado = await usuarioService.reativarUsuario(id);
-    
     return res.status(200).json(resultado);
   } catch (error) {
     console.error("ERRO NO CONTROLLER (reativarUsuario):", error.message);
-    
-    if (error.message.includes('Usuário não encontrado')) {
-      return res.status(404).json({ message: error.message });
-    }
-    if (error.message.includes('já está ativo')) {
-      return res.status(400).json({ message: error.message });
-    }
-    
-    return res.status(500).json({
-      message: "Erro interno do servidor ao tentar reativar usuário.",
-      erro: error.message
-    });
+    if (error.message.includes('Usuário não encontrado')) return res.status(404).json({ message: error.message });
+    if (error.message.includes('já está ativo')) return res.status(400).json({ message: error.message });
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
   }
 }
 
-// Excluir usuário permanentemente (hard delete)
 async function excluirUsuarioPermanente(req, res) {
   try {
     const { id } = req.params;
-    
     const resultado = await usuarioService.excluirUsuarioPermanente(id);
-    
     return res.status(200).json(resultado);
   } catch (error) {
     console.error("ERRO NO CONTROLLER (excluirUsuarioPermanente):", error.message);
-    
-    if (error.message.includes('Usuário não encontrado')) {
-      return res.status(404).json({ message: error.message });
-    }
-    if (error.message.includes('registros relacionados') || 
-        error.message.includes('Use a desativação')) {
-      return res.status(400).json({ message: error.message });
-    }
-    
-    return res.status(500).json({
-      message: "Erro interno do servidor ao tentar excluir usuário.",
-      erro: error.message
-    });
+    if (error.message.includes('Usuário não encontrado')) return res.status(404).json({ message: error.message });
+    if (error.message.includes('registros relacionados') || error.message.includes('Use a desativação')) return res.status(400).json({ message: error.message });
+    return res.status(500).json({ message: "Erro interno.", erro: error.message });
   }
 }
 
 const usuarioController = {
-  // Autenticação
   cadastrarUsuario,
+  confirmarConta, // NOVA FUNÇÃO EXPORTADA
   loginUsuario,
   buscarPorId,
   listarUsuarios,
@@ -305,7 +263,8 @@ const usuarioController = {
   validarToken,
   desativarUsuario,
   reativarUsuario,
-  excluirUsuarioPermanente
+  excluirUsuarioPermanente,
+  atualizarFoto 
 };
 
 export default usuarioController;

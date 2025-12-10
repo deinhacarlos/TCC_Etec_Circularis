@@ -1,0 +1,413 @@
+/* ARQUIVO: styles.css/notificacoes.css */
+
+/* ==================== VARIÁVEIS CSS ==================== */
+:root {
+    --primary-purple: #6C63FF;
+    --light-lilac: #F7EFFF;
+    --white: #FFFFFF;
+    --dark-text: #2B2B2B;
+    --gray-text: #666666;
+    --light-gray: #F5F5F5;
+    --border-color: #E0E0E0;
+    --success-green: #5FD068;
+    --error-red: #FF4757;
+    --alert-bg: #FFF5F5;
+}
+
+/* ==================== RESET ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--dark-text);
+    background-color: #FAFAFA;
+    overflow-x: hidden;
+}
+
+/* ==================== LAYOUT PRINCIPAL ==================== */
+.perfil-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+
+/* ==================== SIDEBAR ==================== */
+.perfil-sidebar {
+    background: var(--white);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+.sidebar-header {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    text-decoration: none;
+    color: #565E6C;
+    font-weight: 600;
+    font-size: small;
+    font-family: 'Caprasimo', sans-serif;
+}
+
+.logo-icon {
+    width: 75px;
+    height: 65px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: 1.5rem 0;
+}
+
+/* --- ESTILOS PADRONIZADOS DOS BOTÕES DA SIDEBAR --- */
+.menu-item,
+.btn-sair,
+.btn-voltar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.9rem 1.5rem;
+    text-decoration: none;
+    color: var(--gray-text);
+    font-weight: 500;
+    font-size: 0.95rem;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    border: none;
+    background: none;
+    text-align: left;
+}
+
+.menu-item span,
+.btn-sair span,
+.btn-voltar span {
+    font-size: 0.95rem;
+    font-family: 'Nunito', sans-serif;
+}
+
+.menu-item i, 
+.btn-sair i, 
+.btn-voltar i {
+    font-size: 1.2rem;
+}
+
+/* Hover padrão (Menu) */
+.menu-item:hover {
+    background-color: #F9F9F9;
+    color: var(--dark-text);
+}
+
+/* Item Ativo */
+.menu-item.active {
+    background-color: var(--light-lilac);
+    color: var(--primary-purple);
+    border-right: 3px solid var(--primary-purple);
+}
+
+/* --- ESTILOS ESPECÍFICOS: LOGOUT E VOLTAR --- */
+.btn-sair:hover {
+    background-color: #FFF5F5;
+    color: var(--error-red);
+}
+
+.btn-voltar {
+    margin-bottom: 0.5rem;
+}
+
+.btn-voltar:hover {
+    background-color: var(--light-lilac);
+    color: var(--primary-purple);
+}
+
+/* Badge Contador */
+.badge-count {
+    background-color: var(--error-red);
+    color: white;
+    border-radius: 50%;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.75rem;
+    margin-left: auto;
+}
+
+/* ==================== CONTEÚDO PRINCIPAL ==================== */
+.perfil-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.notifications-container {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ==================== HEADER DA LISTA ==================== */
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.notifications-header h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark-text);
+    margin-bottom: 0.5rem;
+}
+
+.notifications-header p {
+    color: var(--gray-text);
+    font-size: 0.95rem;
+}
+
+/* [NOVO] Container para os botões do header */
+.header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Botão Marcar todas */
+.btn-mark-all {
+    background: transparent;
+    border: 1px solid var(--primary-purple);
+    color: var(--primary-purple);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.btn-mark-all:hover {
+    background: var(--light-lilac);
+}
+
+/* [NOVO] Botão Excluir Todas */
+.btn-delete-all {
+    background: transparent;
+    border: 1px solid var(--error-red);
+    color: var(--error-red);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.btn-delete-all:hover {
+    background: #FFF5F5;
+    transform: translateY(-2px);
+}
+
+/* ==================== FILTROS ==================== */
+.filters-container {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.btn-filter {
+    padding: 0.5rem 1.2rem;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--gray-text);
+    font-size: 0.9rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-filter:hover {
+    border-color: var(--primary-purple);
+    color: var(--primary-purple);
+}
+
+.btn-filter.active {
+    background: var(--primary-purple);
+    color: white;
+    border-color: var(--primary-purple);
+}
+
+.btn-filter.active-alert {
+    background: var(--error-red);
+    color: white;
+    border-color: var(--error-red);
+}
+
+/* ==================== CARDS DE NOTIFICAÇÃO ==================== */
+.notification-card {
+    background: var(--white);
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1.2rem;
+    transition: all 0.2s ease;
+    border-left: 4px solid transparent;
+    cursor: pointer; /* Indica clicável */
+}
+
+.notification-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #FAFAFA;
+}
+
+/* Estados da Notificação */
+.notification-card.unread {
+    background-color: #fff;
+    border-left-color: var(--primary-purple);
+    border-color: #E0E0E0;
+}
+
+.notification-card.read {
+    background-color: #FAFAFA;
+    opacity: 0.8;
+    border-left-color: #CCC;
+}
+
+.notification-card.type-alerta {
+    border-left-color: var(--error-red);
+    background-color: #FFF9F9;
+}
+
+/* Ícones dentro do card */
+.notif-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+
+.unread .notif-icon-box { background-color: var(--light-lilac); color: var(--primary-purple); }
+.read .notif-icon-box { background-color: #EEE; color: #999; }
+.type-alerta .notif-icon-box { background-color: #FFE5E5; color: var(--error-red); }
+
+/* Conteúdo do Card */
+.notif-content { flex: 1; }
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+}
+
+.notif-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--dark-text);
+}
+
+.notif-date {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.notif-message {
+    font-size: 0.9rem;
+    color: var(--gray-text);
+    line-height: 1.5;
+    margin-bottom: 0.8rem;
+}
+
+/* ==================== AÇÕES DENTRO DO CARD (BOTÕES) ==================== */
+.notif-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn-action,
+.notification-card button {
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--primary-purple);
+    
+    position: relative; /* Z-Index para ficar clicável acima do card */
+    z-index: 2;         
+}
+
+.btn-action.delete { color: var(--error-red); }
+.btn-action:hover,
+.notification-card button:hover { 
+    text-decoration: underline; 
+}
+
+/* ==================== EMPTY STATE ==================== */
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: #CCC;
+}
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* ==================== RESPONSIVIDADE ==================== */
+@media (max-width: 768px) {
+    .perfil-layout { grid-template-columns: 1fr; }
+    .perfil-sidebar { display: none; }
+    .perfil-content { padding: 1.5rem; }
+    .notifications-container { padding: 1.5rem; }
+    
+    .notifications-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .btn-mark-all, .btn-delete-all {
+        flex: 1;
+        justify-content: center;
+    }
+}

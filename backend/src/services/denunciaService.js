@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import notificacaoService from './notificacaoService.js'; // Importação essencial para o alerta
 
 async function criarDenuncia(dados) {
   const { 
@@ -10,6 +11,7 @@ async function criarDenuncia(dados) {
     Id_Troca_FK
   } = dados;
 
+  // Validações básicas
   if (!Descricao || !Tipo_Denuncia || !Id_Usuario_Denunciante_FK) {
     throw new Error('Descrição, Tipo de Denúncia e Usuário Denunciante são obrigatórios.');
   }
@@ -20,11 +22,13 @@ async function criarDenuncia(dados) {
   }
 
   // Verificar se o denunciante não está denunciando a si mesmo
-  if (Id_Usuario_Denunciante_FK === Id_Usuario_Denunciado_FK) {
+  if (Id_Usuario_Denunciado_FK && Id_Usuario_Denunciante_FK == Id_Usuario_Denunciado_FK) {
     throw new Error('Não é possível denunciar a si mesmo.');
   }
 
   try {
+    // 1. Inserir a Denúncia no Banco (Histórico)
+    // O Status vai como 'true' (1) porque o sistema notifica automaticamente, então conta como "resolvida/entregue"
     const [resultado] = await pool.query(
       `INSERT INTO Denuncia (
         Descricao, Tipo_Denuncia, Data_Denuncia, Status,
@@ -35,7 +39,7 @@ async function criarDenuncia(dados) {
         Descricao,
         Tipo_Denuncia,
         new Date(),
-        false, // Status padrão = false (não resolvida)
+        true, // Status TRUE: O alerta foi enviado automaticamente
         Id_Usuario_Denunciante_FK,
         Id_Usuario_Denunciado_FK || null,
         Id_Material_FK || null,
@@ -43,7 +47,40 @@ async function criarDenuncia(dados) {
       ]
     );
 
-    return { id: resultado.insertId, message: 'Denúncia registrada com sucesso!' };
+    // 2. Lógica de Notificação Automática (O "Admin" Automático)
+    let usuarioParaNotificar = Id_Usuario_Denunciado_FK; // Se for denúncia direta de perfil
+    let tituloItem = "seu perfil";
+    let mensagemAlerta = "";
+
+    // Se for denúncia de MATERIAL, precisamos descobrir quem é o dono
+    if (Id_Material_FK) {
+      const [materialRows] = await pool.query(
+        'SELECT Id_Usuario_FK, Titulo FROM Material WHERE Id_Material = ?', 
+        [Id_Material_FK]
+      );
+      
+      if (materialRows.length > 0) {
+        usuarioParaNotificar = materialRows[0].Id_Usuario_FK;
+        tituloItem = `seu material "${materialRows[0].Titulo}"`;
+      }
+    }
+
+    // Se identificamos quem notificar e não é o próprio denunciante
+    if (usuarioParaNotificar && usuarioParaNotificar != Id_Usuario_Denunciante_FK) {
+      
+      // Personaliza a mensagem baseada na descrição
+      mensagemAlerta = `A comunidade reportou um problema em ${tituloItem}. Motivo: "${Descricao}". Por favor, verifique se está de acordo com as regras.`;
+
+      // Chama o serviço de notificação
+      await notificacaoService.criarNotificacao({
+        Titulo: "Alerta da Comunidade",
+        Mensagem: mensagemAlerta,
+        Tipo_Notificacao: "Alerta", // Pode ser usado para mostrar um ícone diferente no front
+        Id_Usuario_FK: usuarioParaNotificar
+      });
+    }
+
+    return { id: resultado.insertId, message: 'Denúncia registrada e proprietário notificado.' };
   } catch (error) {
     console.error("ERRO NO SERVICE (criarDenuncia):", error);
     throw new Error(error.message || "Erro ao criar denúncia no banco de dados.");
@@ -95,37 +132,26 @@ async function listarDenuncias(filtros = {}) {
     `;
     const valores = [];
 
-    // Filtrar por tipo de denúncia
     if (filtros.tipo_denuncia) {
       query += ' AND d.Tipo_Denuncia = ?';
       valores.push(filtros.tipo_denuncia);
     }
-
-    // Filtrar por status
     if (filtros.status !== undefined) {
       query += ' AND d.Status = ?';
       valores.push(filtros.status);
     }
-
-    // Filtrar por usuário denunciante
     if (filtros.usuario_denunciante_id) {
       query += ' AND d.Id_Usuario_Denunciante_FK = ?';
       valores.push(filtros.usuario_denunciante_id);
     }
-
-    // Filtrar por usuário denunciado
     if (filtros.usuario_denunciado_id) {
       query += ' AND d.Id_Usuario_Denunciado_FK = ?';
       valores.push(filtros.usuario_denunciado_id);
     }
-
-    // Filtrar por material
     if (filtros.material_id) {
       query += ' AND d.Id_Material_FK = ?';
       valores.push(filtros.material_id);
     }
-
-    // Filtrar por troca
     if (filtros.troca_id) {
       query += ' AND d.Id_Troca_FK = ?';
       valores.push(filtros.troca_id);
@@ -133,11 +159,9 @@ async function listarDenuncias(filtros = {}) {
 
     query += ' ORDER BY d.Data_Denuncia DESC';
 
-    // Paginação
     if (filtros.limite) {
       query += ' LIMIT ?';
       valores.push(parseInt(filtros.limite));
-      
       if (filtros.offset) {
         query += ' OFFSET ?';
         valores.push(parseInt(filtros.offset));
@@ -154,7 +178,6 @@ async function listarDenuncias(filtros = {}) {
 
 async function atualizarDenuncia(id, dadosParaAtualizar) {
   const { Descricao, Status } = dadosParaAtualizar;
-
   const campos = [];
   const valores = [];
 
@@ -162,7 +185,6 @@ async function atualizarDenuncia(id, dadosParaAtualizar) {
     campos.push('Descricao = ?');
     valores.push(Descricao);
   }
-
   if (Status !== undefined) {
     campos.push('Status = ?');
     valores.push(Status);
@@ -181,7 +203,6 @@ async function atualizarDenuncia(id, dadosParaAtualizar) {
     if (resultado.affectedRows === 0) {
       throw new Error('Denúncia não encontrada ou nenhum dado alterado.');
     }
-
     return { message: 'Denúncia atualizada com sucesso!', affectedRows: resultado.affectedRows };
   } catch (error) {
     console.error("ERRO NO SERVICE (atualizarDenuncia):", error);
@@ -199,9 +220,7 @@ async function resolverDenuncia(id) {
     if (resultado.affectedRows === 0) {
       throw new Error('Denúncia não encontrada.');
     }
-
     return { message: 'Denúncia marcada como resolvida!' };
-
   } catch (error) {
     console.error("ERRO NO SERVICE (resolverDenuncia):", error);
     throw new Error(error.message || "Erro ao resolver denúncia.");
@@ -215,9 +234,7 @@ async function excluirDenuncia(id) {
     if (resultado.affectedRows === 0) {
       throw new Error('Denúncia não encontrada.');
     }
-
     return { message: 'Denúncia excluída com sucesso!' };
-
   } catch (error) {
     console.error("ERRO NO SERVICE (excluirDenuncia):", error);
     throw new Error(error.message || "Erro ao excluir denúncia.");

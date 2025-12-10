@@ -1,5 +1,8 @@
 import denunciaService from '../services/denunciaService.js';
 
+// ========================================================
+// 1. CRIAR DENÚNCIA (Agora gera notificação automática)
+// ========================================================
 async function criarDenuncia(req, res) {
   try {
     const resultado = await denunciaService.criarDenuncia(req.body);
@@ -7,6 +10,7 @@ async function criarDenuncia(req, res) {
   } catch (error) {
     console.error("ERRO NO CONTROLLER (criarDenuncia):", error.message);
     
+    // Tratamento de erros de validação (Campos obrigatórios, auto-denúncia, etc)
     if (error.message.includes('são obrigatórios') || 
         error.message.includes('necessário informar') ||
         error.message.includes('Não é possível denunciar')) {
@@ -20,6 +24,9 @@ async function criarDenuncia(req, res) {
   }
 }
 
+// ========================================================
+// 2. BUSCAR POR ID
+// ========================================================
 async function buscarPorId(req, res) {
   try {
     const { id } = req.params;
@@ -39,10 +46,15 @@ async function buscarPorId(req, res) {
   }
 }
 
+// ========================================================
+// 3. LISTAR DENÚNCIAS (Com filtros)
+// ========================================================
 async function listarDenuncias(req, res) {
   try {
+    // Prepara os filtros baseados na Query String da URL
     const filtros = {
       tipo_denuncia: req.query.tipo_denuncia,
+      // Converte string 'true'/'false' para booleano
       status: req.query.status === 'true' ? true : 
               req.query.status === 'false' ? false : undefined,
       usuario_denunciante_id: req.query.usuario_denunciante_id,
@@ -53,7 +65,7 @@ async function listarDenuncias(req, res) {
       offset: req.query.offset
     };
 
-    // Remover propriedades undefined
+    // Remove chaves que ficaram como undefined para não atrapalhar o Service
     Object.keys(filtros).forEach(key => {
       if (filtros[key] === undefined) {
         delete filtros[key];
@@ -71,6 +83,9 @@ async function listarDenuncias(req, res) {
   }
 }
 
+// ========================================================
+// 4. ATUALIZAR DENÚNCIA
+// ========================================================
 async function atualizarDenuncia(req, res) {
   try {
     const { id } = req.params;
@@ -96,6 +111,9 @@ async function atualizarDenuncia(req, res) {
   }
 }
 
+// ========================================================
+// 5. RESOLVER DENÚNCIA (Mantido para compatibilidade)
+// ========================================================
 async function resolverDenuncia(req, res) {
   try {
     const { id } = req.params;
@@ -117,6 +135,9 @@ async function resolverDenuncia(req, res) {
   }
 }
 
+// ========================================================
+// 6. EXCLUIR DENÚNCIA
+// ========================================================
 async function excluirDenuncia(req, res) {
   try {
     const { id } = req.params;

@@ -1,4 +1,4 @@
-import pool from '../config/db.js'
+import pool from '../config/db.js';
 
 // Função para capitalizar cada palavra
 function capitalizeWords(str) {
@@ -9,7 +9,6 @@ function capitalizeWords(str) {
 }
 
 async function cadastrarMaterial(dados) {
-  // Capitalização e normalização dos dados essenciais
   let {
     Titulo,
     Descricao,
@@ -18,19 +17,18 @@ async function cadastrarMaterial(dados) {
     Categoria,
     Objetivo,
     Localizacao,
-    IdUsuarioFK
+    IdUsuarioFK,
+    Autor
   } = dados;
 
-  // Padroniza visualmente
   Titulo = capitalizeWords(Titulo ?? "");
   TipoMaterial = capitalizeWords(TipoMaterial ?? "");
   EstadoConservacao = capitalizeWords(EstadoConservacao ?? "");
   if (Categoria) Categoria = capitalizeWords(Categoria);
+  if (Autor) Autor = capitalizeWords(Autor); // <-- Capitaliza
 
-  // Imagem deve ser tratada pelo controller usando req.file ou req.body.Imagem
   const Imagem = dados.Imagem ?? null;
 
-  // Campos obrigatórios
   if (!Titulo || !TipoMaterial || !EstadoConservacao || !IdUsuarioFK) {
     throw new Error('Título, Tipo de Material, Estado de Conservação e Usuário são obrigatórios.');
   }
@@ -38,21 +36,23 @@ async function cadastrarMaterial(dados) {
   try {
     const [resultado] = await pool.query(
       `INSERT INTO Material (
-        Titulo, Descricao, Tipo_Material, Estado_Conservacao, Categoria, 
-        Imagem, DataCadastro, Objetivo, Localizacao, Disponibilidade, Id_Usuario_FK
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        Titulo, Descricao, Tipo_Material, Estado_Conservacao, Categoria, Autor, 
+        Imagem, DataCadastro, Objetivo, Localizacao, Disponibilidade, Id_Usuario_FK, DataAlteracao
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, // <-- 13 placeholders
       [
         Titulo,
         Descricao ?? null,
         TipoMaterial,
         EstadoConservacao,
         Categoria ?? null,
+        Autor ?? null, // <-- Incluir Autor
         Imagem,
         new Date(),
-        Objetivo ?? 'troca',
+        Objetivo ?? null,
         Localizacao ?? null,
-        true, // Disponibilidade padrão = true
-        IdUsuarioFK
+        true,
+        IdUsuarioFK,
+        new Date() // DataAlteracao igual DataCadastro na criação
       ]
     );
     return { id: resultado.insertId };
@@ -63,29 +63,24 @@ async function cadastrarMaterial(dados) {
 }
 
 async function buscarMaterialPorId(id) {
-  try {
-    const [rows] = await pool.query(`
-      SELECT 
-        m.*,
-        u.Nome_Completo as Nome_Usuario,
-        u.Email as Email_Usuario,
-        u.Telefone as Telefone_Usuario
-      FROM Material m
-      LEFT JOIN Usuario u ON m.Id_Usuario_FK = u.Id_Usuario
-      WHERE m.Id_Material = ?
-    `, [id]);
+  // JOIN para pegar também o Nome e Foto do dono do material
+  const query = `
+    SELECT 
+      m.*, 
+      u.Nome_Completo AS Nome_Dono, 
+      u.FotoPerfil AS Foto_Dono,
+      u.Id_Usuario AS Id_Dono
+    FROM Material m
+    JOIN Usuario u ON m.Id_Usuario_FK = u.Id_Usuario
+    WHERE m.Id_Material = ?
+  `;
 
-    const material = rows[0];
-    if (!material) throw new Error('Material não encontrado.');
-    return material;
-  } catch (error) {
-    console.error("ERRO NO SERVICE (buscarMaterialPorId):", error);
-    throw new Error("Erro ao buscar material no banco de dados.");
-  }
+  const [rows] = await pool.query(query, [id]);
+  return rows[0];
 }
 
 async function listarMateriais(filtros = {}) {
-  try {
+  try { // 1. O TRY COMEÇA AQUI
     let query = `
       SELECT 
         m.*,
@@ -96,32 +91,33 @@ async function listarMateriais(filtros = {}) {
     `;
     const valores = [];
 
-    // Filtros dinâmicos
     if (filtros.disponibilidade !== undefined) {
       query += ' AND m.Disponibilidade = ?';
       valores.push(filtros.disponibilidade);
     }
-    if (filtros.tipo_material) {
+    if (filtros.TipoMaterial) {
       query += ' AND m.Tipo_Material = ?';
-      valores.push(filtros.tipo_material);
+      valores.push(filtros.TipoMaterial);
     }
-    if (filtros.categoria) {
+    if (filtros.Categoria) {
       query += ' AND m.Categoria = ?';
-      valores.push(filtros.categoria);
+      valores.push(filtros.Categoria);
     }
-    if (filtros.estado_conservacao) {
+    if (filtros.EstadoConservacao) {
       query += ' AND m.Estado_Conservacao = ?';
-      valores.push(filtros.estado_conservacao);
+      valores.push(filtros.EstadoConservacao);
     }
-    if (filtros.usuario_id) {
+    if (filtros.usuarioid) {
       query += ' AND m.Id_Usuario_FK = ?';
-      valores.push(filtros.usuario_id);
+      valores.push(filtros.usuarioid);
     }
     if (filtros.busca) {
-      query += ' AND (m.Titulo LIKE ? OR m.Descricao LIKE ?)';
-      valores.push(`%${filtros.busca}%`, `%${filtros.busca}%`);
+      query += ' AND (m.Titulo LIKE ? OR m.Descricao LIKE ? OR m.Autor LIKE ?)';
+      valores.push(`%${filtros.busca}%`, `%${filtros.busca}%`, `%${filtros.busca}%`);
     }
+
     query += ' ORDER BY m.DataCadastro DESC';
+
     if (filtros.limite) {
       query += ' LIMIT ?';
       valores.push(parseInt(filtros.limite));
@@ -130,9 +126,16 @@ async function listarMateriais(filtros = {}) {
         valores.push(parseInt(filtros.offset));
       }
     }
+
+    // --- DEBUG LOGS (Opcional, só para testar) ---
+    console.log("--- DEBUG BUSCA ---");
+    console.log("SQL:", query);
+    console.log("Valores:", valores);
+
     const [rows] = await pool.query(query, valores);
     return rows;
-  } catch (error) {
+
+  } catch (error) { 
     console.error("ERRO NO SERVICE (listarMateriais):", error);
     throw new Error("Erro ao buscar materiais no banco de dados.");
   }
@@ -148,27 +151,36 @@ async function atualizarMaterial(id, dadosParaAtualizar) {
     Imagem,
     Objetivo,
     Localizacao,
-    Disponibilidade
+    Disponibilidade,
+    Autor
   } = dadosParaAtualizar;
 
-  // Capitalize se necessário (para campos textuais editáveis)
   if (Titulo) Titulo = capitalizeWords(Titulo);
   if (TipoMaterial) TipoMaterial = capitalizeWords(TipoMaterial);
   if (EstadoConservacao) EstadoConservacao = capitalizeWords(EstadoConservacao);
   if (Categoria) Categoria = capitalizeWords(Categoria);
+  if (Autor) Autor = capitalizeWords(Autor);
 
   const campos = [];
   const valores = [];
 
-  if (Titulo) { campos.push('Titulo = ?'); valores.push(Titulo); }
+  // Se o valor não é undefined (foi enviado e não foi limpo no controller),
+  // ele é adicionado para atualização (pode ser "" ou null se o usuário limpou o campo)
+  if (Titulo !== undefined) { campos.push('Titulo = ?'); valores.push(Titulo); }
   if (Descricao !== undefined) { campos.push('Descricao = ?'); valores.push(Descricao); }
-  if (TipoMaterial) { campos.push('Tipo_Material = ?'); valores.push(TipoMaterial); }
-  if (EstadoConservacao) { campos.push('Estado_Conservacao = ?'); valores.push(EstadoConservacao); }
+  if (TipoMaterial !== undefined) { campos.push('Tipo_Material = ?'); valores.push(TipoMaterial); }
+  if (EstadoConservacao !== undefined) { campos.push('Estado_Conservacao = ?'); valores.push(EstadoConservacao); }
   if (Categoria !== undefined) { campos.push('Categoria = ?'); valores.push(Categoria); }
   if (Imagem !== undefined) { campos.push('Imagem = ?'); valores.push(Imagem); }
-  if (Objetivo) { campos.push('Objetivo = ?'); valores.push(Objetivo); }
+  if (Objetivo !== undefined) { campos.push('Objetivo = ?'); valores.push(Objetivo); }
   if (Localizacao !== undefined) { campos.push('Localizacao = ?'); valores.push(Localizacao); }
+  if (Autor !== undefined) { campos.push('Autor = ?'); valores.push(Autor); }
+  // Disponibilidade pode ser um booleano (já convertido no controller)
   if (Disponibilidade !== undefined) { campos.push('Disponibilidade = ?'); valores.push(Disponibilidade); }
+
+  // Sempre atualiza DataAlteracao
+  campos.push('DataAlteracao = ?');
+  valores.push(new Date());
 
   if (campos.length === 0) {
     throw new Error('Nenhum dado válido fornecido para atualização.');
@@ -213,13 +225,14 @@ async function excluirMaterial(id) {
 
 async function alterarDisponibilidade(id, disponibilidade) {
   try {
+    // Atualiza DataAlteracao também!
     const [resultado] = await pool.query(
-      'UPDATE Material SET Disponibilidade = ? WHERE Id_Material = ?',
-      [disponibilidade, id]
+      'UPDATE Material SET Disponibilidade = ?, DataAlteracao = ? WHERE Id_Material = ?',
+      [disponibilidade, new Date(), id]
     );
     if (resultado.affectedRows === 0) throw new Error('Material não encontrado.');
-    return { 
-      message: `Material ${disponibilidade ? 'disponibilizado' : 'indisponibilizado'} com sucesso!` 
+    return {
+      message: `Material ${disponibilidade ? 'disponibilizado' : 'indisponibilizado'} com sucesso!`
     };
   } catch (error) {
     console.error("ERRO NO SERVICE (alterarDisponibilidade):", error);

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - Circularis</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Nunito:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+  <!-- CSS Externo -->
+  <link rel="stylesheet" href="styles.css/global.css">
+  <link rel="stylesheet" href="styles.css/cadastro-usuario.css">
+</head>
+
+<body>
+
+  <!-- ==================== HEADER ==================== -->
+
+
+  <main class="container-fluid  vh-100">
+    <div class="row h-100">
+      <div class="col-lg-6 col-md-12 left-section d-flex flex-column">
+        <div class="logo-container">
+          <a href="index.html" class="logo d-flex align-items-center">
+            <img src="assets/logo.png" alt="Logo Circularis" class="logo-simples">
+          </a>
+          <!-- LADO ESQUERDO (FORMULÁRIO) -->
+          <div class="form-container">
+            <h1 class="form-title">Crie uma conta</h1>
+            <p class="form-subtitle">
+              Ao criar uma conta, você concorda com os
+              <a href="#" id="openTerms" class="link-green">Termos</a> e
+              <a href="#" id="openPrivacy" class="link-green">Política de privacidade</a>.
+            </p>
+
+            <form id="registerForm" novalidate>
+
+              <div class="form-group">
+                <label for="fullName">Nome completo</label>
+                <input type="text" class="form-control" id="fullName" placeholder="Seu nome" required>
+                <div class="error-message" id="nameError"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" class="form-control" id="email" placeholder="exemplo.email@gmail.com" required>
+                <div class="error-message" id="emailError"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="password">Crie uma senha</label>
+                <div class="password-container">
+                  <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+                  <button type="button" class="toggle-password" id="togglePassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+                <div class="error-message" id="passwordError"></div>
+                <div class="password-hint">Mínimo de 8 caracteres, com letras e números</div>
+              </div>
+
+              <div class="form-group">
+                <label for="confirmPassword">Confirmar senha</label>
+                <div class="password-container">
+                  <input type="password" class="form-control" id="confirmPassword" placeholder="••••••••" required>
+                  <button type="button" class="toggle-password" id="toggleConfirmPassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+                <div class="error-message" id="confirmPasswordError"></div>
+              </div>
+
+              <button type="submit" class="btn-cadastrar-full">Cadastrar</button>
+            </form>
+
+            <p class="login-link">
+              Já possui uma conta? <a href="login.html">Faça Login</a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- LADO DIREITO (BOAS-VINDAS) -->
+      <div class="col-lg-6 d-none d-lg-flex right-section">
+        <div class="welcome-container">
+          <h2 class="welcome-title">Seja bem-vindo à Circularis!</h2>
+          <p class="welcome-subtitle">Um espaço para quem acredita que o aprendizado<br>é melhor quando é
+            compartilhado.</p>
+
+          <img src="assets/cadastroLogin.png" alt="Pessoas comemorando" class="welcome-illustration">
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- ==================== MODAL DE TERMOS ==================== -->
+  <div class="modal-overlay" id="termsModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closeTerms">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <h3 class="modal-title">Termos de Uso</h3>
+      <div class="modal-body">
+        <h4>1. Aceitação dos Termos</h4>
+        <p>Ao criar uma conta e utilizar a plataforma CIRCULARIS, o usuário declara que leu, compreendeu e
+          concorda com estes Termos de Uso, bem como com a Política de Privacidade correspondente.
+        </p>
+
+        <h4>2. Sobre a Plataforma</h4>
+        <p>A CIRCULARIS é uma plataforma colaborativa destinada à troca e/ou doação de livros e materiais
+          escolares entre usuários. Não há qualquer intermediação financeira pela plataforma.
+        </p>
+
+        <h4>3. Cadastro do Usuário</h4>
+        <p>- Para utilizar a plataforma, é necessário criar uma conta fornecendo nome completo, e-mail e
+          senha.
+          <br>
+          - O usuário se responsabiliza por manter seus dados atualizados.
+          <br>
+          - O usuário deve ser maior de 13 anos ou possuir autorização de um responsável.
+        </p>
+
+        <h4>4. Responsabilidades do Usuário</h4>
+        <p>O usuário concorda em:
+          <br>
+          - Fornecer informações verdadeiras no cadastro e no anúncio de materiais.
+          <br>
+          - Não publicar materiais ilegais, ofensivos ou que violem direitos autorais.
+          <br>
+          - Utilizar o chat e demais recursos da plataforma com respeito e cordialidade.
+          <br>
+          - Não tentar burlar o sistema, realizar fraudes ou
+          atividades maliciosas.
+        </p>
+
+        <h4>5. Publicação e Trocas de Materiais</h4>
+        <p> - Todo material cadastrado é de responsabilidade exclusiva do usuário que o publicou.
+          <br>
+          - A CIRCULARIS não garante a qualidade, autenticidade ou estado físico dos materiais ofertados.
+          <br>
+          - As trocas e doações são combinadas diretamente entre os usuários, sem qualquer participação
+          da plataforma.
+
+        </p>
+
+        <h4>6. Conteúdos Proibidos</h4>
+        <p>É proibido publicar ou compartilhar:
+          - Materiais falsificados, piratas, ilegais ou protegidos por direitos
+          autorais sem autorização;
+          <br>
+          - Conteúdos discriminatórios, ofensivos ou que incitem violência; -
+          Informações falsas ou enganosas.
+        </p>
+
+        <h4>7. Denúncias e Moderação</h4>
+        <p>A plataforma disponibiliza ferramentas de denúncia. Conteúdos que violem estes Termos poderão ser
+          removidos, e usuários poderão ser suspensos ou banidos.</p>
+
+        <h4>8. Privacidade e Segurança</h4>
+        <p>O uso da plataforma implica no aceite da Política de Privacidade, que detalha o tratamento de dados
+          pessoais conforme a LGPD.</p>
+
+        <h4>9. Alterações nos Termos</h4>
+        <p>A CIRCULARIS poderá atualizar estes Termos a qualquer momento. Usuários serão informados em caso
+          de mudanças significativas.</p>
+
+        <h4>10. Encerramento de Conta</h4>
+        <p>O usuário pode solicitar a exclusão de sua conta a qualquer momento. A plataforma também pode
+          encerrar contas que violem estes Termos.</p>
+
+        <h4>11. Limitação de Responsabilidade</h4>
+        <p>A CIRCULARIS não se responsabiliza por:
+          <br>
+          - Danos decorrentes de negociações entre usuários;
+          <br>
+          - Informações falsas fornecidas por terceiros;
+          <br>
+          - Interrupções temporárias na plataforma.
+        </p>
+
+        <h4>12. Contato</h4>
+        <p>Em caso de dúvidas, o usuário pode entrar em contato pelo canal de suporte informado na plataforma</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL DE POLÍTICA DE PRIVACIDADE ==================== -->
+  <div class="modal-overlay" id="privacyModal">
+    <div class="modal-content">
+      <button class="modal-close" id="closePrivacy">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <h3 class="modal-title">Política de Privacidade</h3>
+      <div class="modal-body">
+        <h4>1. Introdução</h4>
+        <p>A CIRCULARIS se compromete a proteger a privacidade dos usuários e a tratar seus dados pessoais com
+          segurança, transparência e respeito, em conformidade com a Lei Geral de Proteção de Dados (LGPD –
+          Lei nº 13.709/2018).
+          <br>
+          Esta Política de Privacidade descreve quais dados são coletados, como são utilizados, por quanto tempo
+          são armazenados e quais são os direitos do usuário.
+        </p>
+
+        <h4>2. Dados Coletados</h4>
+        <p>A plataforma poderá coletar os seguintes dados pessoais:
+          <br>
+          - Dados de cadastro: nome completo, e-mail,
+          senha, localização aproximada (cidade/bairro).
+          <br>
+          - Dados de navegação: páginas acessadas, ações
+          realizadas dentro da plataforma.
+          <br>
+          - Dados de comunicação: mensagens trocadas pelo chat interno.
+          <br>
+          - Imagem de perfil: quando o usuário optar por fazer upload.
+        </p>
+
+        <h4>3. Finalidades do Tratamento</h4>
+        <p>Os dados coletados são utilizados para:
+          <br>
+          - Criar e manter a conta do usuário;
+          <br>
+          - Permitir a troca/doação de
+          materiais escolares entre usuários;
+          <br>
+          - Facilitar a comunicação via chat;
+          <br>
+          - Garantir segurança, prevenção a
+          fraudes e autenticação;
+          <br>
+          - Enviar notificações relevantes sobre a plataforma;
+          <br>
+          - Gerenciar denúncias e
+          manter um ambiente seguro.
+        </p>
+
+        <h4>4. Base Legal (LGPD)</h4>
+        <p>O tratamento de dados é fundamentado nas bases legais previstas na LGPD:
+          <br>
+          - Consentimento do
+          usuário (Art. 7º, I);
+          <br>
+          - Cumprimento de obrigação legal (Art. 7º, II);
+          <br>
+          - Execução de contrato ou
+          procedimentos preliminares (Art. 7º, V);
+          <br>
+          - Legítimo interesse (Art. 7º, IX), quando necessário para
+          melhorar a experiência e segurança da plataforma.
+        </p>
+
+        <h4>5. Compartilhamento de Dados</h4>
+        <p>A CIRCULARIS não vende nem compartilha dados pessoais com terceiros para fins comerciais.
+          <br>
+          Os dados podem ser compartilhados apenas quando:
+          <br>
+          - Houver solicitação do próprio usuário;
+          <br>
+          - Forem necessários para cumprir obrigações legais ou ordens judiciais;
+          <br>
+          - For imprescindível para operação técnica da plataforma (ex.: envio de notificações).
+        </p>
+
+        <h4>6. Armazenamento e Segurança</h4>
+        <p> - Os dados são armazenados em ambiente seguro, com medidas de proteção contra acesso não
+          autorizado.
+          <br>
+          - Senhas são armazenadas de forma criptografada.
+          <br>
+          - O acesso às informações é restrito a responsáveis pelo sistema, mantendo sigilo e
+          confidencialidade.
+        </p>
+
+        <h4>7. Tempo de Retenção</h4>
+        <p>Os dados são mantidos enquanto:
+          <br>
+          - A conta do usuário estiver ativa;
+          <br>
+          - Forem necessários para
+          finalidades legais, auditorias ou segurança.
+          <br>
+          Ao solicitar exclusão da conta, os dados serão removidos, exceto quando a lei exigir armazenamento
+          por período adicional.
+        </p>
+
+        <h4>8. Direitos do Usuário (LGPD)</h4>
+        <p>Conforme a LGPD, o usuário tem direito a:
+          <br>
+          - Confirmar a existência de tratamento de dados;
+          <br>
+          - Solicitar acesso aos seus dados;
+          <br>
+          - Corrigir dados incompletos ou desatualizados;
+          <br>
+          - Solicitar anonimização,
+          bloqueio ou eliminação de dados desnecessários;
+          <br>
+          - Revogar consentimento a qualquer momento;
+          <br>
+          - Solicitar portabilidade;
+          <br>
+          - Solicitar exclusão definitiva da conta.
+          <br>
+          Para exercer seus direitos, o usuário pode entrar em contato pelo canal de suporte informado na
+          plataforma.
+        </p>
+
+        <h4>9. Uso de Cookies e Dados de Navegação</h4>
+        <p>A plataforma pode utilizar cookies para:
+          <br>
+          - Melhorar a experiência de navegação;
+          <br>
+          - Salvar sessões e preferências do usuário;
+          <br>
+          - Analisar uso da plataforma
+          <br>
+          O usuário pode desativar cookies no navegador, porém algumas funções podem deixar de funcionar
+          corretamente.
+        </p>
+
+        <h4>10. Chat e Comunicação Interna</h4>
+        <p>Mensagens enviadas pelo chat são armazenadas de forma segura e podem ser utilizadas para
+          moderação, denúncias ou investigações de violação de regras.
+          <br>
+          A plataforma não acessa o conteúdo das mensagens para fins comerciais.
+        </p>
+
+        <h4>11. Alterações na Política</h4>
+        <p>A CIRCULARIS poderá atualizar esta Política de Privacidade periodicamente. Mudanças significativas
+          serão comunicadas ao usuário.
+        </p>
+
+        <h4>12. Contato</h4>
+        <p>Para qualquer dúvida sobre privacidade ou sobre seus dados pessoais, entre em contato através do
+          suporte da plataforma.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- JavaScript personalizado -->
+  <script src="scripts/cadastro-usuario-script.js"></script>
+
+</body>
+
+</html>

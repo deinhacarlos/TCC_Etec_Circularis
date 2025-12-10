@@ -1,0 +1,151 @@
+/* ==================== MEUS MATERIAIS CSS ==================== */
+
+/* Card da Tabela */
+.materiais-section {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    margin-bottom: 2rem;
+    /* Removemos o overflow daqui e deixamos para o .table-responsive no HTML */
+}
+
+/* Botão Novo Material */
+.btn-novo-material {
+    background: var(--primary-purple);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    font-size: 0.95rem;
+    white-space: nowrap; /* Impede que o texto quebre */
+}
+
+.btn-novo-material:hover {
+    background: #5952E6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+}
+
+/* ==================== TABELA RESPONSIVA ==================== */
+
+/* Wrapper da tabela (Adicionado via Bootstrap class .table-responsive) */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Rolagem suave no iOS */
+}
+
+.table {
+    color: var(--dark-text);
+    margin-bottom: 0;
+    border-collapse: separate; 
+    border-spacing: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    
+    /* IMPORTANTE: Garante que a tabela não encolha demais */
+    min-width: 1200px; 
+}
+
+/* TÍTULOS (THEAD) */
+.table thead th {
+    background-color: var(--light-lilac);
+    color: var(--primary-purple);
+    font-weight: 600;
+    padding: 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    white-space: nowrap; /* Impede quebra de linha no título */
+}
+
+.table thead th:last-child { border-right: none; }
+.table thead th:first-child { border-top-left-radius: 12px; }
+.table thead th:last-child { border-top-right-radius: 12px; }
+
+/* CORPO DA TABELA (TBODY) */
+.table tbody td {
+    vertical-align: middle;
+    padding: 0.8rem;
+    font-size: 0.9rem;
+    font-family: 'Nunito', sans-serif;
+    color: var(--gray-text);
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+}
+
+.table tbody tr td:last-child { border-right: none; }
+.table tbody tr:last-child td { border-bottom: none; }
+
+/* Alinhamentos Específicos */
+.table tbody tr td:nth-child(2), /* Título */
+.table tbody tr td:nth-child(3), /* Descrição */
+.table tbody tr td:nth-child(6), /* Categoria */
+.table tbody tr td:nth-child(7)  /* Autor */
+{
+    text-align: left;
+}
+
+/* Imagem na tabela */
+.img-tabela {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+/* Limite de texto na descrição */
+.desc-limit {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==================== RESPONSIVIDADE (MOBILE) ==================== */
+@media (max-width: 768px) {
+    /* Ajuste do Card */
+    .materiais-section { 
+        padding: 1rem; 
+        border-radius: 8px;
+    }
+
+    /* Ajuste do Cabeçalho da Página (Título e Botão) */
+    .perfil-content .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: stretch !important; /* Estica os itens */
+        gap: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .btn-novo-material {
+        justify-content: center;
+        width: 100%;
+        padding: 0.8rem;
+    }
+    
+    /* Garante que o span do botão apareça no mobile se quiser */
+    .btn-novo-material span.d-none {
+        display: inline !important;
+    }
+}

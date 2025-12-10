@@ -1,5 +1,10 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Importação das Rotas
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import materialRoutes from './routes/materialRoutes.js';
 import trocaRoutes from './routes/trocaRoutes.js';
@@ -9,9 +14,16 @@ import notificacaoRoutes from './routes/notificacaoRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import mensagemRoutes from './routes/mensagemRoutes.js';
 
+// Carregar variáveis de ambiente
+dotenv.config();
+
 const app = express();
 
-app.use('/uploads', express.static('uploads'));
+// --- CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS (IMAGENS) ---
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// A pasta uploads está uma nível acima de src (../uploads)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Middlewares globais
 app.use(cors());
@@ -33,6 +45,7 @@ app.get('/', (req, res) => {
   res.json({ 
     message: 'API Circularis - Sistema de Troca de Materiais Sustentáveis',
     version: '1.0.0',
+    status: 'online',
     endpoints: {
       usuarios: '/api/usuarios',
       materiais: '/api/materiais',
@@ -50,5 +63,8 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
   res.status(404).json({ message: 'Rota não encontrada' });
 });
+
+// --- IMPORTANTE: REMOVIDO O app.listen DAQUI ---
+// O servidor é iniciado exclusivamente pelo arquivo server.js
 
 export default app;

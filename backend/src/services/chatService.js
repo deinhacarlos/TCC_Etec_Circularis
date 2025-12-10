@@ -1,10 +1,7 @@
 import pool from '../config/db.js';
 
 async function criarChat(dados) {
-  const { 
-    Id_Usuario1_FK,
-    Id_Usuario2_FK
-  } = dados;
+  const { Id_Usuario1_FK, Id_Usuario2_FK } = dados;
 
   if (!Id_Usuario1_FK || !Id_Usuario2_FK) {
     throw new Error('Ambos os usuários são obrigatórios para criar um chat.');
@@ -15,7 +12,6 @@ async function criarChat(dados) {
   }
 
   try {
-    // Verificar se já existe um chat entre esses usuários
     const [chatExistente] = await pool.query(`
       SELECT Id_Chat FROM Chat 
       WHERE (Id_Usuario1_FK = ? AND Id_Usuario2_FK = ?) 
@@ -30,31 +26,16 @@ async function criarChat(dados) {
       };
     }
 
-    // Verificar se os usuários existem
-    const [usuario1] = await pool.query(
-      'SELECT Id_Usuario FROM Usuario WHERE Id_Usuario = ?',
-      [Id_Usuario1_FK]
-    );
-
-    const [usuario2] = await pool.query(
-      'SELECT Id_Usuario FROM Usuario WHERE Id_Usuario = ?',
-      [Id_Usuario2_FK]
-    );
+    const [usuario1] = await pool.query('SELECT Id_Usuario FROM Usuario WHERE Id_Usuario = ?', [Id_Usuario1_FK]);
+    const [usuario2] = await pool.query('SELECT Id_Usuario FROM Usuario WHERE Id_Usuario = ?', [Id_Usuario2_FK]);
 
     if (usuario1.length === 0 || usuario2.length === 0) {
       throw new Error('Um ou ambos os usuários não foram encontrados.');
     }
 
     const [resultado] = await pool.query(
-      `INSERT INTO Chat (
-        Id_Usuario1_FK, Id_Usuario2_FK, DataCriacao, Ativo
-      ) VALUES (?, ?, ?, ?)`,
-      [
-        Id_Usuario1_FK,
-        Id_Usuario2_FK,
-        new Date(),
-        true
-      ]
+      `INSERT INTO Chat (Id_Usuario1_FK, Id_Usuario2_FK, DataCriacao, Ativo) VALUES (?, ?, ?, ?)`,
+      [Id_Usuario1_FK, Id_Usuario2_FK, new Date(), true]
     );
 
     return { id: resultado.insertId, message: 'Chat criado com sucesso!', existente: false };
@@ -82,10 +63,7 @@ async function buscarChatPorId(id) {
     `, [id]);
     
     const chat = rows[0];
-
-    if (!chat) {
-      throw new Error('Chat não encontrado.');
-    }
+    if (!chat) throw new Error('Chat não encontrado.');
     return chat;
   } catch (error) {
     console.error("ERRO NO SERVICE (buscarChatPorId):", error);
@@ -93,6 +71,7 @@ async function buscarChatPorId(id) {
   }
 }
 
+// === FUNÇÃO ATUALIZADA COM STATUS DA TROCA ===
 async function listarChats(filtros = {}) {
   try {
     let query = `
@@ -103,7 +82,15 @@ async function listarChats(filtros = {}) {
         u2.Nome_Completo as Nome_Usuario2,
         u2.FotoPerfil as Foto_Usuario2,
         (SELECT COUNT(*) FROM Mensagem WHERE Id_Chat_FK = c.Id_Chat) as Total_Mensagens,
-        (SELECT MAX(DataEnvio) FROM Mensagem WHERE Id_Chat_FK = c.Id_Chat) as Ultima_Mensagem_Data
+        (SELECT MAX(DataEnvio) FROM Mensagem WHERE Id_Chat_FK = c.Id_Chat) as Ultima_Mensagem_Data,
+        
+        /* SUBQUERY PARA PEGAR O STATUS DA ÚLTIMA TROCA ENTRE ELES */
+        (SELECT Status FROM Troca t 
+         WHERE (t.Id_Usuario_Solicitante_FK = c.Id_Usuario1_FK AND t.Id_Usuario_Doador_FK = c.Id_Usuario2_FK)
+            OR (t.Id_Usuario_Solicitante_FK = c.Id_Usuario2_FK AND t.Id_Usuario_Doador_FK = c.Id_Usuario1_FK)
+         ORDER BY t.Data_Solicitacao DESC LIMIT 1
+        ) as Ultimo_Status_Troca
+
       FROM Chat c
       LEFT JOIN Usuario u1 ON c.Id_Usuario1_FK = u1.Id_Usuario
       LEFT JOIN Usuario u2 ON c.Id_Usuario2_FK = u2.Id_Usuario
@@ -111,13 +98,11 @@ async function listarChats(filtros = {}) {
     `;
     const valores = [];
 
-    // Filtrar por usuário (retorna chats onde o usuário participa)
     if (filtros.usuario_id) {
       query += ' AND (c.Id_Usuario1_FK = ? OR c.Id_Usuario2_FK = ?)';
       valores.push(filtros.usuario_id, filtros.usuario_id);
     }
 
-    // Filtrar por status ativo
     if (filtros.ativo !== undefined) {
       query += ' AND c.Ativo = ?';
       valores.push(filtros.ativo);
@@ -125,11 +110,9 @@ async function listarChats(filtros = {}) {
 
     query += ' ORDER BY Ultima_Mensagem_Data DESC, c.DataCriacao DESC';
 
-    // Paginação
     if (filtros.limite) {
       query += ' LIMIT ?';
       valores.push(parseInt(filtros.limite));
-      
       if (filtros.offset) {
         query += ' OFFSET ?';
         valores.push(parseInt(filtros.offset));
@@ -146,49 +129,29 @@ async function listarChats(filtros = {}) {
 
 async function atualizarChat(id, dadosParaAtualizar) {
   const { Ativo } = dadosParaAtualizar;
-
   const campos = [];
   const valores = [];
 
-  if (Ativo !== undefined) {
-    campos.push('Ativo = ?');
-    valores.push(Ativo);
-  }
-
-  if (campos.length === 0) {
-    throw new Error('Nenhum dado válido fornecido para atualização.');
-  }
-
+  if (Ativo !== undefined) { campos.push('Ativo = ?'); valores.push(Ativo); }
+  if (campos.length === 0) throw new Error('Nenhum dado válido fornecido para atualização.');
   valores.push(id);
 
   try {
     const query = `UPDATE Chat SET ${campos.join(', ')} WHERE Id_Chat = ?`;
     const [resultado] = await pool.query(query, valores);
-
-    if (resultado.affectedRows === 0) {
-      throw new Error('Chat não encontrado ou nenhum dado alterado.');
-    }
-
+    if (resultado.affectedRows === 0) throw new Error('Chat não encontrado.');
     return { message: 'Chat atualizado com sucesso!', affectedRows: resultado.affectedRows };
   } catch (error) {
     console.error("ERRO NO SERVICE (atualizarChat):", error);
-    throw new Error(error.message || "Erro ao atualizar chat no banco de dados.");
+    throw new Error(error.message || "Erro ao atualizar chat.");
   }
 }
 
 async function desativarChat(id) {
   try {
-    const [resultado] = await pool.query(
-      'UPDATE Chat SET Ativo = false WHERE Id_Chat = ?',
-      [id]
-    );
-
-    if (resultado.affectedRows === 0) {
-      throw new Error('Chat não encontrado.');
-    }
-
+    const [resultado] = await pool.query('UPDATE Chat SET Ativo = false WHERE Id_Chat = ?', [id]);
+    if (resultado.affectedRows === 0) throw new Error('Chat não encontrado.');
     return { message: 'Chat desativado com sucesso!' };
-
   } catch (error) {
     console.error("ERRO NO SERVICE (desativarChat):", error);
     throw new Error(error.message || "Erro ao desativar chat.");
@@ -197,18 +160,10 @@ async function desativarChat(id) {
 
 async function excluirChat(id) {
   try {
-    // Excluir todas as mensagens do chat primeiro
     await pool.query('DELETE FROM Mensagem WHERE Id_Chat_FK = ?', [id]);
-
-    // Excluir o chat
     const [resultado] = await pool.query('DELETE FROM Chat WHERE Id_Chat = ?', [id]);
-
-    if (resultado.affectedRows === 0) {
-      throw new Error('Chat não encontrado.');
-    }
-
+    if (resultado.affectedRows === 0) throw new Error('Chat não encontrado.');
     return { message: 'Chat e todas as mensagens excluídos com sucesso!' };
-
   } catch (error) {
     console.error("ERRO NO SERVICE (excluirChat):", error);
     throw new Error(error.message || "Erro ao excluir chat.");

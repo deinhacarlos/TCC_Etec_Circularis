@@ -4,10 +4,10 @@ async function enviarMensagem(dados) {
   const { 
     Conteudo,
     Id_Chat_FK,
-    Id_Usuario_Rementente_FK
+    Id_Usuario_Remetente_FK 
   } = dados;
 
-  if (!Conteudo || !Id_Chat_FK || !Id_Usuario_Rementente_FK) {
+  if (!Conteudo || !Id_Chat_FK || !Id_Usuario_Remetente_FK) {
     throw new Error('Conteúdo, Chat e Usuário Remetente são obrigatórios.');
   }
 
@@ -26,22 +26,26 @@ async function enviarMensagem(dados) {
       throw new Error('Chat está desativado.');
     }
 
+    // --- CORREÇÃO AQUI: Converter para Number para garantir a comparação correta ---
+    const remetenteId = Number(Id_Usuario_Remetente_FK);
+    const usuario1 = Number(chat[0].Id_Usuario1_FK);
+    const usuario2 = Number(chat[0].Id_Usuario2_FK);
+
     // Verificar se o usuário remetente participa do chat
-    if (chat[0].Id_Usuario1_FK !== Id_Usuario_Rementente_FK && 
-        chat[0].Id_Usuario2_FK !== Id_Usuario_Rementente_FK) {
+    if (usuario1 !== remetenteId && usuario2 !== remetenteId) {
       throw new Error('Usuário não participa deste chat.');
     }
 
     const [resultado] = await pool.query(
       `INSERT INTO Mensagem (
-        Conteudo, DataEnvio, Lida, Id_Chat_FK, Id_Usuario_Rementente_FK
+        Conteudo, DataEnvio, Lida, Id_Chat_FK, Id_Usuario_Remetente_FK
       ) VALUES (?, ?, ?, ?, ?)`,
       [
         Conteudo,
         new Date(),
         false,
         Id_Chat_FK,
-        Id_Usuario_Rementente_FK
+        Id_Usuario_Remetente_FK 
       ]
     );
 
@@ -61,7 +65,7 @@ async function buscarMensagemPorId(id) {
         u.Email as Email_Remetente,
         u.FotoPerfil as Foto_Remetente
       FROM Mensagem m
-      LEFT JOIN Usuario u ON m.Id_Usuario_Rementente_FK = u.Id_Usuario
+      LEFT JOIN Usuario u ON m.Id_Usuario_Remetente_FK = u.Id_Usuario
       WHERE m.Id_Mensagem = ?
     `, [id]);
     
@@ -85,7 +89,7 @@ async function listarMensagens(filtros = {}) {
         u.Nome_Completo as Nome_Remetente,
         u.FotoPerfil as Foto_Remetente
       FROM Mensagem m
-      LEFT JOIN Usuario u ON m.Id_Usuario_Rementente_FK = u.Id_Usuario
+      LEFT JOIN Usuario u ON m.Id_Usuario_Remetente_FK = u.Id_Usuario
       WHERE 1=1
     `;
     const valores = [];
@@ -98,7 +102,7 @@ async function listarMensagens(filtros = {}) {
 
     // Filtrar por remetente
     if (filtros.usuario_remetente_id) {
-      query += ' AND m.Id_Usuario_Rementente_FK = ?';
+      query += ' AND m.Id_Usuario_Remetente_FK = ?';
       valores.push(filtros.usuario_remetente_id);
     }
 
@@ -155,7 +159,7 @@ async function marcarTodasComoLidas(chatId, usuarioId) {
       `UPDATE Mensagem 
        SET Lida = true 
        WHERE Id_Chat_FK = ? 
-       AND Id_Usuario_Rementente_FK != ? 
+       AND Id_Usuario_Remetente_FK != ? 
        AND Lida = false`,
       [chatId, usuarioId]
     );
@@ -193,7 +197,7 @@ async function contarNaoLidas(chatId, usuarioId) {
       `SELECT COUNT(*) as total 
        FROM Mensagem 
        WHERE Id_Chat_FK = ? 
-       AND Id_Usuario_Rementente_FK != ? 
+       AND Id_Usuario_Remetente_FK != ? 
        AND Lida = false`,
       [chatId, usuarioId]
     );

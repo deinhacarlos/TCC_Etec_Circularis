@@ -16,6 +16,11 @@ router.get('/', verificarToken, trocaController.listarTrocas);
 // Atualizar troca (observações)
 router.put('/:id', verificarToken, trocaController.atualizarTroca);
 
+// === ROTA NOVA IMPORTANTE (ADICIONADA) ===
+// Responder à troca (Aceitar/Rejeitar)
+router.patch('/:id/responder', verificarToken, trocaController.responderTroca);
+// =========================================
+
 // Concluir troca
 router.patch('/:id/concluir', verificarToken, trocaController.concluirTroca);
 
