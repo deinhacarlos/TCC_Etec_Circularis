@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Circularis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="styles.css/global.css"> <link rel="stylesheet" href="styles.css/perfil.css">
+    <link rel="stylesheet" href="styles.css/configuracoes.css">
+</head>
+<body>
+    <div class="perfil-layout">
+        <aside class="perfil-sidebar">
+            <div class="sidebar-header">
+                <a href="busca.html" class="logo">
+                    <img src="assets/logo.png" alt="Logo" class="logo-icon" onerror="this.src='https://via.placeholder.com/75'">
+                    <span>CIRCULARIS</span>
+                </a>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="perfil.html" class="menu-item"><i class="bi bi-gear"></i><span>Dados Pessoais</span></a>
+                <a href="meusmateriais.html" class="menu-item"><i class="bi bi-book"></i><span>Meus Livros/Materiais</span></a>
+                <a href="trocas-pendentes.html" class="menu-item"><i class="bi bi-arrow-left-right"></i><span>Trocas Pendentes</span></a>
+                <a href="notificacoes.html" class="menu-item"><i class="bi bi-bell"></i><span>Notificações</span><span id="sidebarCount" class="badge-count" style="display:none">0</span></a>
+                <a href="configuracoes-conta.html" class="menu-item active"><i class="bi bi-sliders"></i><span>Configurações de Conta</span></a>
+            </nav>
+            <button class="btn-sair" id="btnLogout"><i class="bi bi-box-arrow-left"></i><span>Logout</span></button>
+            <button class="btn-voltar" onclick="window.location.href='busca.html'"><i class="bi bi-box-arrow-left"></i><span>Voltar</span></button>
+        </aside>
+
+        <main class="perfil-content">
+            <h2 class="page-title mb-4" style="font-size: 1.5rem; font-weight: 700;">Configurações da Conta</h2>
+
+            <section class="dados-section mb-4">
+                <h3 class="section-title"><i class="bi bi-shield-lock me-2"></i>Segurança</h3>
+                <p class="text-muted mb-4">Gerencie sua senha de acesso.</p>
+                <form id="formSenha">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label for="senhaAtual">Senha Atual</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="senhaAtual" placeholder="Digite sua senha atual" required>
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="senhaAtual"><i class="bi bi-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="novaSenha">Nova Senha</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="novaSenha" placeholder="Mínimo 6 caracteres" required minlength="6">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="novaSenha"><i class="bi bi-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="confirmaSenha">Confirmar Nova Senha</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="confirmaSenha" placeholder="Repita a nova senha" required minlength="6">
+                                <button class="btn btn-outline-secondary toggle-password" type="button" data-target="confirmaSenha"><i class="bi bi-eye"></i></button>
+                            </div>
+                            <div class="error-message" id="senhaError"></div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-salvar">Atualizar Senha</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="dados-section danger-zone">
+                <h3 class="section-title text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Zona de Perigo</h3>
+                <div class="danger-item">
+                    <div class="danger-info">
+                        <h4>Desativar Conta</h4>
+                        <p>Sua conta ficará oculta nas buscas.</p>
+                    </div>
+                    <button class="btn btn-warning-custom" data-bs-toggle="modal" data-bs-target="#modalDesativar">Desativar Conta</button>
+                </div>
+                <hr class="my-4">
+                <div class="danger-item">
+                    <div class="danger-info">
+                        <h4>Excluir Conta Permanentemente</h4>
+                        <p>Esta ação é <strong>irreversível</strong>.</p>
+                    </div>
+                    <button class="btn btn-danger-custom" data-bs-toggle="modal" data-bs-target="#modalExcluir">Excluir Conta</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal fade" id="modalDesativar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Desativação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body"><p>Tem certeza que deseja desativar sua conta?</p></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-warning" id="btnConfirmarDesativar">Sim, Desativar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalExcluir" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title text-danger">Excluir Conta</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <p>Para confirmar, digite <strong class="user-select-all">DELETAR</strong>:</p>
+                    <input type="text" class="form-control" id="inputConfirmacaoDelete" placeholder="Digite DELETAR">
+                    <div class="alert alert-danger mt-3 d-none" id="erroExclusao"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmarExcluir" disabled>Excluir Permanentemente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="scripts/utils.js"></script> <script src="scripts/configuracoes-conta-script.js"></script>
+</body>
+</html>
