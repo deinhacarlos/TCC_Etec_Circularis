@@ -1,96 +1,200 @@
-// src/styles/CadastroMaterialStyles.js
 import { StyleSheet } from 'react-native';
-import { colors } from './colors'; // Usando sua paleta existente
+import { colors } from './colors';
 
 export default StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  headerBar: {
-    paddingTop: 50, // Ajuste para StatusBar
-    paddingBottom: 15,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    backgroundColor: colors.lightGray || '#F9F9F9',
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 100,
+    paddingBottom: 50,
   },
+  
+  /* Card Container */
+  formContainer: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+
+  /* Títulos */
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: colors.darkText,
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.grayText,
+    textAlign: 'center',
+    marginBottom: 25,
+    lineHeight: 20,
+  },
+
+  /* Labels e Inputs */
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: colors.darkText,
     marginBottom: 6,
-    marginTop: 12,
+    marginTop: 15,
   },
   input: {
-    backgroundColor: '#FFFFFF',
-    fontSize: 14,
-    height: 45,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: colors.darkText,
   },
   textArea: {
-    backgroundColor: '#FFFFFF',
-    fontSize: 14,
+    height: 100,
+    textAlignVertical: 'top',
   },
-  row: {
+
+  /* Select Simulado */
+  selectButton: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  col: {
+  selectText: {
+    fontSize: 15,
+    color: colors.darkText,
+  },
+  placeholderText: {
+    color: '#999',
+  },
+
+  /* Grid */
+  row: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  colCity: {
+    flex: 2,
+  },
+  colUF: {
     flex: 1,
   },
-  /* Área de Upload (Tracejado no protótipo) */
+
+  /* Upload */
   uploadArea: {
-    marginTop: 8,
-    borderWidth: 1.5,
-    borderColor: '#E0E0E0',
+    marginTop: 15,
+    borderWidth: 2,
+    borderColor: '#CFCFCF',
     borderStyle: 'dashed',
-    borderRadius: 12,
-    height: 150,
+    borderRadius: 10,
+    height: 160,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#FAFAFA',
-    overflow: 'hidden',
   },
-  uploadPlaceholder: {
-    alignItems: 'center',
-    padding: 10,
+  uploadIcon: {
+    marginBottom: 10,
   },
   uploadText: {
-    color: '#666',
+    color: colors.grayText,
+    fontSize: 14,
+  },
+  btnSelectImage: {
+    marginTop: 10,
+    backgroundColor: colors.primaryPurple,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+  },
+  btnSelectImageText: {
+    color: colors.white,
+    fontWeight: 'bold',
     fontSize: 12,
-    marginTop: 8,
-    textAlign: 'center',
   },
   previewImage: {
     width: '100%',
     height: '100%',
+    borderRadius: 8,
   },
+
   /* Botão Principal */
-  saveButton: {
-    backgroundColor: '#5D5FEF', // Roxo do protótipo (próximo ao seu primaryPurple)
+  submitButton: {
+    backgroundColor: colors.primaryPurple,
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 30,
-    elevation: 2,
-    shadowColor: '#5D5FEF',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    elevation: 3,
   },
-  saveButtonText: {
-    color: '#FFFFFF',
+  submitButtonText: {
+    color: colors.white,
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  /* --- ÁREA FIXA DO FOOTER --- */
+  footerArea: {
+    width: '100%', 
+    height: 100,
+    paddingVertical: 2,
+    paddingHorizontal: 0, 
+    backgroundColor: '#000000', 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /* Modal de Seleção */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    maxHeight: '80%',
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: colors.darkText,
+  },
+  optionItem: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
+  },
+  optionText: {
+    fontSize: 16,
+    color: colors.darkText,
+  },
+  closeModalButton: {
+    marginTop: 15,
+    alignItems: 'center',
+    padding: 10,
+  },
+  closeModalText: {
+    color: colors.errorRed,
     fontWeight: 'bold',
   },
 });

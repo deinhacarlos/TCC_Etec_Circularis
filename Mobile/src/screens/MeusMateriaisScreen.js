@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import styles from '../styles/MeusMateriaisStyles';
-import { apiGetAuth } from '../Api';
+import { apiGetAuth, getUserId, API_URL } from '../Api';
 import TermsFooter from '../components/TermsFooter';
 
 export default function MeusMateriaisScreen({ navigation }) {
@@ -20,9 +20,14 @@ export default function MeusMateriaisScreen({ navigation }) {
   const carregarMateriais = async () => {
     try {
       setLoading(true);
+      const userId = await getUserId();
+      
+      if (!userId) {
+        throw new Error('Usuário não identificado');
+      }
 
-      // equivalente à lógica do meusmateriais-script.js (buscar do usuário logado)
-      const res = await apiGetAuth('/materiais/meus'); // ajuste se seu backend usar outra rota
+      // CORREÇÃO: Usando a mesma rota do Web (Query Param)
+      const res = await apiGetAuth(`/materiais?usuarioid=${userId}`);
 
       if (Array.isArray(res)) {
         setMateriais(res);
@@ -32,6 +37,7 @@ export default function MeusMateriaisScreen({ navigation }) {
         setMateriais([]);
       }
     } catch (error) {
+      console.log(error);
       Alert.alert('Erro', 'Não foi possível carregar seus materiais.');
     } finally {
       setLoading(false);
@@ -86,35 +92,41 @@ export default function MeusMateriaisScreen({ navigation }) {
             Você ainda não cadastrou nenhum material.
           </Text>
         ) : (
-          materiais.map((mat) => (
-            <View key={mat.id || mat.IDMaterial} style={styles.card}>
-              {/* Imagem do material, se houver URL */}
-              {mat.imagemUrl || mat.Imagem ? (
-                <Image
-                  source={{ uri: mat.imagemUrl || mat.Imagem }}
-                  style={styles.cardImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.cardImagePlaceholder}>
-                  <Text style={styles.cardImagePlaceholderText}>Sem imagem</Text>
-                </View>
-              )}
+          materiais.map((mat) => {
+            // Ajuste para pegar a URL da imagem corretamente
+            const imgPath = mat.Imagem || mat.imagemUrl;
+            const fullImgUrl = imgPath ? `${API_URL}/uploads/${imgPath}` : null;
 
-              <View style={styles.cardInfo}>
-                <Text style={styles.cardTitle}>{mat.titulo || mat.Titulo}</Text>
-                <Text style={styles.cardCategory}>
-                  {mat.categoria || mat.Categoria}
-                </Text>
-                <Text style={styles.cardDetails}>
-                  Estado: {mat.estadoConservacao || mat.EstadoConservacao}
-                </Text>
-                <Text style={styles.cardDetails}>
-                  Tipo: {mat.tipo || mat.Tipo}
-                </Text>
+            return (
+              <View key={mat.Id_Material || mat.id} style={styles.card}>
+                {/* Imagem do material */}
+                {fullImgUrl ? (
+                  <Image
+                    source={{ uri: fullImgUrl }}
+                    style={styles.cardImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.cardImagePlaceholder}>
+                    <Text style={styles.cardImagePlaceholderText}>Sem imagem</Text>
+                  </View>
+                )}
+
+                <View style={styles.cardInfo}>
+                  <Text style={styles.cardTitle}>{mat.Titulo || mat.titulo}</Text>
+                  <Text style={styles.cardCategory}>
+                    {mat.Categoria || mat.categoria || 'Sem categoria'}
+                  </Text>
+                  <Text style={styles.cardDetails}>
+                    Estado: {mat.EstadoConservacao || mat.estadoConservacao}
+                  </Text>
+                  <Text style={styles.cardDetails}>
+                    Tipo: {mat.TipoMaterial || mat.Tipo || mat.tipo}
+                  </Text>
+                </View>
               </View>
-            </View>
-          ))
+            );
+          })
         )}
       </ScrollView>
 

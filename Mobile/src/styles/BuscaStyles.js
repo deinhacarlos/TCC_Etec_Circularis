@@ -1,4 +1,3 @@
-// src/styles/BuscaStyles.js
 import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from './colors';
 
@@ -10,7 +9,7 @@ export default StyleSheet.create({
     backgroundColor: colors.white,
   },
 
-  /* --- HEADER --- */
+  /* --- HEADER PADRONIZADO --- */
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -21,10 +20,6 @@ export default StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGray,
     elevation: 4,
-    shadowColor: colors.darkText,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
 
   headerLeft: {
@@ -39,9 +34,9 @@ export default StyleSheet.create({
   },
 
   logoText: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: colors.darkText,
+    color: colors.grayText,
   },
 
   headerRight: {
@@ -108,7 +103,7 @@ export default StyleSheet.create({
     backgroundColor: colors.white,
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    borderRadius: 25,
+    borderRadius: 12,
     marginHorizontal: 16,
     marginTop: 16,
     marginBottom: 16,
@@ -148,7 +143,7 @@ export default StyleSheet.create({
 
   filterLabel: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: colors.darkText,
   },
 
@@ -194,7 +189,7 @@ export default StyleSheet.create({
 
   /* --- LISTA --- */
   listContent: {
-    paddingBottom: 20, // Reduzi de 90 para 20 pois não tem mais menu flutuante por cima
+    paddingBottom: 20,
   },
 
   emptyState: {
@@ -243,26 +238,22 @@ export default StyleSheet.create({
   cardAuthor: {
     fontSize: 14,
     color: colors.grayText,
-    marginBottom: 12,
+    marginBottom: 8,
   },
 
-  tagContainer: {
+  locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
-    backgroundColor: colors.lightGray,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
   },
 
-  cardTagText: {
-    fontSize: 12,
+  cardLocationText: {
+    fontSize: 13,
     color: colors.grayText,
-    marginLeft: 6,
+    marginLeft: 4,
   },
 
+  /* BOTOES */
   actionButton: {
     backgroundColor: colors.primaryPurple,
     paddingVertical: 12,
@@ -289,7 +280,7 @@ export default StyleSheet.create({
     width: '100%',
     marginTop: 24,
     paddingHorizontal: 16,
-    paddingVertical: 24,
+    paddingVertical: 15,
     backgroundColor: '#000000',
     alignItems: 'center',
   },
@@ -298,15 +289,15 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 16,
-    marginBottom: 12,
+    marginBottom: 8,
   },
 
   footerText: {
     fontFamily: 'Nunito-Regular',
-    fontSize: 12,
+    fontSize: 11,
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
 
   footerLinksContainer: {
@@ -318,7 +309,7 @@ export default StyleSheet.create({
 
   footerLinkText: {
     fontFamily: 'Nunito-Bold',
-    fontSize: 12,
+    fontSize: 11,
     color: '#4DA3FF',
     textDecorationLine: 'underline',
   },
