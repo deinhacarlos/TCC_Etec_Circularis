@@ -1,5 +1,3 @@
-/* ARQUIVO: styles.css/notificacoes.css */
-
 /* ==================== VARIÁVEIS CSS ==================== */
 :root {
     --primary-purple: #6C63FF;
@@ -162,7 +160,6 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* ==================== HEADER DA LISTA ==================== */
 .notifications-header {
     display: flex;
     justify-content: space-between;
@@ -182,50 +179,6 @@ body {
 .notifications-header p {
     color: var(--gray-text);
     font-size: 0.95rem;
-}
-
-/* [NOVO] Container para os botões do header */
-.header-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-/* Botão Marcar todas */
-.btn-mark-all {
-    background: transparent;
-    border: 1px solid var(--primary-purple);
-    color: var(--primary-purple);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    transition: all 0.3s;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.btn-mark-all:hover {
-    background: var(--light-lilac);
-}
-
-/* [NOVO] Botão Excluir Todas */
-.btn-delete-all {
-    background: transparent;
-    border: 1px solid var(--error-red);
-    color: var(--error-red);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    transition: all 0.3s;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.btn-delete-all:hover {
-    background: #FFF5F5;
-    transform: translateY(-2px);
 }
 
 /* ==================== FILTROS ==================== */
@@ -278,7 +231,9 @@ body {
     gap: 1.2rem;
     transition: all 0.2s ease;
     border-left: 4px solid transparent;
-    cursor: pointer; /* Indica clicável */
+    
+    /* [NOVO] Torna o card visualmente clicável */
+    cursor: pointer;
 }
 
 .notification-card:hover {
@@ -348,13 +303,14 @@ body {
     margin-bottom: 0.8rem;
 }
 
-/* ==================== AÇÕES DENTRO DO CARD (BOTÕES) ==================== */
+/* ==================== AÇÕES (BOTÕES) ==================== */
 .notif-actions {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
 }
 
+/* [NOVO] Z-Index para garantir que o clique no botão não ative o clique do card */
 .btn-action,
 .notification-card button {
     background: none;
@@ -367,14 +323,27 @@ body {
     gap: 0.4rem;
     color: var(--primary-purple);
     
-    position: relative; /* Z-Index para ficar clicável acima do card */
-    z-index: 2;         
+    position: relative; /* Importante para o z-index */
+    z-index: 2;         /* Fica acima do card */
 }
 
 .btn-action.delete { color: var(--error-red); }
 .btn-action:hover,
 .notification-card button:hover { 
     text-decoration: underline; 
+}
+
+.btn-mark-all {
+    background: transparent;
+    border: 1px solid var(--primary-purple);
+    color: var(--primary-purple);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+.btn-mark-all:hover {
+    background: var(--light-lilac);
 }
 
 /* ==================== EMPTY STATE ==================== */
@@ -395,19 +364,4 @@ body {
     .perfil-sidebar { display: none; }
     .perfil-content { padding: 1.5rem; }
     .notifications-container { padding: 1.5rem; }
-    
-    .notifications-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .header-actions {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .btn-mark-all, .btn-delete-all {
-        flex: 1;
-        justify-content: center;
-    }
 }
