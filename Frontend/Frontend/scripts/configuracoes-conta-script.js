@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (novaSenha.length < 6) {
-            senhaError.textContent = 'A senha deve ter no mínimo 6 caracteres.';
+        if (novaSenha.length < 8) {
+            senhaError.textContent = 'A senha deve ter no mínimo 8 caracteres.';
             senhaError.classList.add('show');
             return;
         }

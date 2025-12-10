@@ -261,7 +261,7 @@ function prepararChatNovaTroca(material) {
     `;
     if (chatInputArea) chatInputArea.style.display = 'flex'; // GARANTE QUE O INPUT APARECE
     if (messageInput) {
-        messageInput.value = `Olá ${donoNome}, tenho interesse no seu material "${material.Titulo}". Podemos combinar  a Troca ou Doação?`;
+        messageInput.value = `Olá ${donoNome}, tenho interesse no seu material "${material.Titulo}". Podemos combinar?`;
         messageInput.focus();
     }
 }
