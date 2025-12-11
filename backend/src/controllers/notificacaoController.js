@@ -1,8 +1,19 @@
 import notificacaoService from '../services/notificacaoService.js';
 
+
+async function criar(req, res) {
+    try {
+        const resultado = await notificacaoService.criarNotificacao(req.body);
+        res.status(201).json(resultado);
+    } catch (error) {
+        console.error("Erro ao criar notificação:", error);
+        res.status(500).json({ error: error.message });
+    }
+}
+// ===================================
+
 async function listar(req, res) {
     try {
-        // Pega do query param (?usuario_id=1) ou do token decodificado se tiver
         const usuarioId = req.query.usuario_id || req.usuario?.id; 
         const notificacoes = await notificacaoService.listarNotificacoes(usuarioId);
         res.json(notificacoes);
@@ -59,4 +70,12 @@ async function contar(req, res) {
     }
 }
 
-export default { listar, marcarLida, marcarTodasLidas, excluir, excluirTodas, contar };
+export default { 
+    criar, 
+    listar, 
+    marcarLida, 
+    marcarTodasLidas, 
+    excluir, 
+    excluirTodas, 
+    contar 
+};

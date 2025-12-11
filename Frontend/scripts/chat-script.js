@@ -1,15 +1,14 @@
+// ==================== CONFIGURAÇÃO ====================
 const BASE_URL = 'http://localhost:3000';
-
-// Variáveis de Estado
 let conversationsData = [];
 let currentConversation = null;
 let currentPartnerId = null;
+let materialParaTroca = null;
 
-// Elementos DOM
-const profilePhoto = document.getElementById('profilePhoto');
+// Elementos do DOM
+const chatHeader = document.getElementById('chatHeader');
 const chatAvatar = document.getElementById('chatAvatar');
 const chatName = document.getElementById('chatName');
-const chatHeader = document.getElementById('chatHeader');
 const chatMessagesArea = document.getElementById('chatMessagesArea');
 const chatInputArea = document.getElementById('chatInput');
 const messageInput = document.getElementById('messageInput');
@@ -17,273 +16,240 @@ const sendBtn = document.getElementById('sendBtn');
 const emptyOverlay = document.getElementById('emptyModalOverlay');
 const conversationsList = document.getElementById('conversationsList');
 
+// URL de imagem padrão para evitar erro 404 se não tiver user.png local
+const DEFAULT_AVATAR = 'https://via.placeholder.com/150/CCCCCC/666666?text=User';
+
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     const usuarioId = localStorage.getItem('usuarioId');
-
-    if (!token || !usuarioId) {
-        window.location.href = 'login.html';
-        return;
+    
+    // Redireciona se não estiver logado
+    if (!token || !usuarioId) { 
+        window.location.href = 'login.html'; 
+        return; 
     }
-
+    
     initChat();
 });
 
 async function initChat() {
-    console.log("Iniciando chat...");
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('usuarioId');
-    
     const params = new URLSearchParams(window.location.search);
     const materialIdParam = params.get('book');
     const targetUserId = params.get('targetUser');
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('usuarioId');
 
     try {
-        await loadConversations(); 
+        await loadConversations();
 
-        // CENÁRIO A: Tem usuário alvo
+        // CASO 1: Abrir chat direto com usuário específico
         if (targetUserId) {
-            console.log("Abrindo chat com usuário alvo:", targetUserId);
-            
-            const conversation = conversationsData.find(c => 
-                c.Id_Usuario1_FK == targetUserId || c.Id_Usuario2_FK == targetUserId
-            );
-
-            if (conversation) {
-                await loadChat(conversation.Id_Chat);
-            } else {
-                await prepararChatPorUsuario(targetUserId);
-            }
-            
-            if(emptyOverlay) emptyOverlay.classList.remove('show');
+            await abrirOuCriarChatComUsuario(targetUserId);
             return;
         }
 
-        // CENÁRIO B: Propor Troca (Livro)
-        if (materialIdParam && !targetUserId) {
-            const resp = await fetch(`${BASE_URL}/api/materiais/${materialIdParam}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+        // CASO 2: Proposta de Troca (Vindo do botão "Propor Troca")
+        if (materialIdParam) {
+            const resp = await fetch(`${BASE_URL}/api/materiais/${materialIdParam}`, { 
+                headers: { 'Authorization': `Bearer ${token}` } 
             });
-
             if (resp.ok) {
                 const material = await resp.json();
-                
+                // Impede troca consigo mesmo
                 if (String(material.Id_Dono) === String(userId)) {
-                    // SUBSTITUIÇÃO DE ALERT
-                    showToast("Você não pode trocar com você mesmo!", "warning");
-                    setTimeout(() => window.location.href = 'busca.html', 2000);
+                    if(window.showToast) showToast("Você não pode trocar com você mesmo!", "warning");
+                    setTimeout(() => window.location.href = 'busca.html', 1500);
                     return;
                 }
-                
-                prepararChatNovaTroca(material);
-                if (emptyOverlay) emptyOverlay.classList.remove('show');
+                await prepararChatParaTroca(material);
             }
             return;
         }
 
-        // CENÁRIO C: Auto-abrir última
+        // CASO 3: Carregar o primeiro chat da lista ou mostrar vazio
         if (conversationsData.length > 0) {
             await loadChat(conversationsData[0].Id_Chat);
             if (emptyOverlay) emptyOverlay.classList.remove('show');
-            return;
+        } else {
+            if (emptyOverlay) emptyOverlay.classList.add('show');
         }
 
-        // Vazio
-        if (emptyOverlay) emptyOverlay.classList.add('show');
-
-    } catch (error) {
-        console.error("Erro no fluxo inicial:", error);
+    } catch (error) { 
+        console.error("Erro na inicialização do chat:", error); 
     }
 }
 
 async function loadConversations() {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('usuarioId');
-
     try {
-        const resp = await fetch(`${BASE_URL}/api/chats?usuario_id=${userId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const resp = await fetch(`${BASE_URL}/api/chats?usuario_id=${userId}`, { 
+            headers: { 'Authorization': `Bearer ${token}` } 
         });
-
         if (resp.ok) {
             conversationsData = await resp.json();
             renderConversationsList();
         }
-    } catch (error) {
-        console.error("Erro ao carregar conversas:", error);
+    } catch (error) { 
+        console.error("Erro ao carregar lista de conversas:", error); 
     }
 }
 
 function renderConversationsList() {
     if (!conversationsList) return;
     const myId = localStorage.getItem('usuarioId');
-
+    
     conversationsList.innerHTML = conversationsData.map(chat => {
         const isUser1Me = (chat.Id_Usuario1_FK == myId);
         const otherName = isUser1Me ? chat.Nome_Usuario2 : chat.Nome_Usuario1;
         const otherPhoto = isUser1Me ? chat.Foto_Usuario2 : chat.Foto_Usuario1;
-        const photoUrl = otherPhoto ? `${BASE_URL}/uploads/${otherPhoto}` : 'assets/user.png';
         
-        const isActive = currentConversation && currentConversation.id === chat.Id_Chat ? 'active' : '';
-
-        // LÓGICA VISUAL DO STATUS
+        // Define a URL da foto ou fallback
+        const photoUrl = otherPhoto ? `${BASE_URL}/uploads/${otherPhoto}` : DEFAULT_AVATAR;
+        const isActive = currentConversation && currentConversation.id == chat.Id_Chat ? 'active' : '';
+        
         let statusBadge = '';
-        let itemClass = '';
-
         if (chat.Ultimo_Status_Troca === 'Concluido') {
             statusBadge = '<div class="status-badge text-success"><i class="bi bi-check-circle-fill"></i> Concluído</div>';
-            itemClass = 'concluded-item';
-        } else if (chat.Ultimo_Status_Troca === 'Cancelado' || chat.Ultimo_Status_Troca === 'Rejeitado') {
-            statusBadge = '<div class="status-badge text-muted"><i class="bi bi-x-circle-fill"></i> Cancelado</div>';
-            itemClass = 'canceled-item';
-        } else {
-            statusBadge = '<div class="conv-preview text-muted small">Clique para conversar</div>';
+        } else if (chat.Ultimo_Status_Troca === 'Pendente') {
+            statusBadge = '<div class="status-badge text-warning"><i class="bi bi-hourglass-split"></i> Ativo</div>';
         }
 
         return `
-            <div class="conversation-item ${isActive} ${itemClass}" onclick="loadChat(${chat.Id_Chat})">
-                <div style="position: relative;">
-                    <img src="${photoUrl}" class="conv-avatar" onerror="this.src='assets/user.png'">
-                    ${chat.Ultimo_Status_Troca === 'Pendente' || chat.Ultimo_Status_Troca === 'Aceito' ? 
-                      '<span class="online-indicator"></span>' : ''}
+            <div class="conversation-item ${isActive}" onclick="loadChat(${chat.Id_Chat})">
+                <div style="position:relative;">
+                    <img src="${photoUrl}" class="conv-avatar" onerror="this.src='${DEFAULT_AVATAR}'">
                 </div>
                 <div class="conv-info">
                     <div class="conv-name">${otherName || 'Usuário'}</div>
                     ${statusBadge}
                 </div>
-            </div>
-        `;
+            </div>`;
     }).join('');
 }
+
 async function loadChat(chatId) {
+    // === CORREÇÃO CRÍTICA ===
+    // Limpa o estado de troca ao mudar de chat. Isso garante que mensagens
+    // normais não sejam tratadas como negociação de troca pendente.
+    materialParaTroca = null; 
+    // ========================
+
     const token = localStorage.getItem('token');
     const myId = localStorage.getItem('usuarioId');
 
     try {
-        const respChat = await fetch(`${BASE_URL}/api/chats/${chatId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const respChat = await fetch(`${BASE_URL}/api/chats/${chatId}`, { 
+            headers: { 'Authorization': `Bearer ${token}` } 
         });
         const chat = await respChat.json();
-
+        
         const isUser1Me = (chat.Id_Usuario1_FK == myId);
         currentPartnerId = isUser1Me ? chat.Id_Usuario2_FK : chat.Id_Usuario1_FK;
         
         const otherName = isUser1Me ? chat.Nome_Usuario2 : chat.Nome_Usuario1;
         const otherPhoto = isUser1Me ? chat.Foto_Usuario2 : chat.Foto_Usuario1;
         
-        if (chatHeader) chatHeader.style.display = 'flex';
-        if (chatName) chatName.textContent = otherName;
-        if (chatAvatar) chatAvatar.src = otherPhoto ? `${BASE_URL}/uploads/${otherPhoto}` : 'assets/user.png';
-        if (chatInputArea) chatInputArea.style.display = 'flex'; // GARANTE QUE O INPUT APARECE
-
+        atualizarHeaderChat(otherName, otherPhoto);
         currentConversation = { id: chatId };
 
-        const respMsg = await fetch(`${BASE_URL}/api/mensagens?chat_id=${chatId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        // Carrega as mensagens
+        const respMsg = await fetch(`${BASE_URL}/api/mensagens?chat_id=${chatId}`, { 
+            headers: { 'Authorization': `Bearer ${token}` } 
         });
         const mensagens = await respMsg.json();
-        
         renderMensagens(mensagens);
         
         if (emptyOverlay) emptyOverlay.classList.remove('show');
+        
+        // Atualiza a lista lateral para marcar o ativo
         renderConversationsList();
 
-    } catch (e) {
-        console.error("Erro ao carregar chat:", e);
+    } catch (e) { 
+        console.error("Erro ao carregar chat:", e); 
     }
 }
 
-function renderMensagens(lista) {
-    if (!chatMessagesArea) return;
-    const myId = localStorage.getItem('usuarioId');
-    
-    chatMessagesArea.innerHTML = lista.map(msg => {
-        const isMe = (msg.Id_Usuario_Remetente_FK == myId);
-        return `
-            <div class="message-wrapper ${isMe ? 'sent' : 'received'}">
-                <div class="message-bubble">
-                    ${!isMe ? `<img src="${chatAvatar.src}" class="msg-avatar">` : ''}
-                    <div class="message-content">
-                        <div class="message-text">${msg.Conteudo}</div>
-                        <div class="message-time">${new Date(msg.DataEnvio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
-}
+async function abrirOuCriarChatComUsuario(targetUserId) {
+    const chatExistente = conversationsData.find(c => 
+        c.Id_Usuario1_FK == targetUserId || c.Id_Usuario2_FK == targetUserId
+    );
 
-async function prepararChatPorUsuario(targetUserId) {
-    const token = localStorage.getItem('token');
-    
-    try {
-        const resp = await fetch(`${BASE_URL}/api/usuarios/${targetUserId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (resp.ok) {
-            const user = await resp.json();
-            
-            if (chatHeader) chatHeader.style.display = 'flex';
-            if (chatName) chatName.textContent = user.Nome_Completo;
-            if (chatAvatar) chatAvatar.src = user.FotoPerfil ? `${BASE_URL}/uploads/${user.FotoPerfil}` : 'assets/user.png';
-            
-            if (chatInputArea) chatInputArea.style.display = 'flex'; // GARANTE QUE O INPUT APARECE
-            if (chatMessagesArea) chatMessagesArea.innerHTML = `<div class="text-center text-muted mt-5">Inicie a conversa com ${user.Nome_Completo}</div>`;
-            
-            currentPartnerId = targetUserId;
-            currentConversation = null; 
-        }
-    } catch (e) {
-        console.error("Erro ao buscar usuário:", e);
+    if (chatExistente) {
+        await loadChat(chatExistente.Id_Chat);
+    } else {
+        try {
+            const resp = await fetch(`${BASE_URL}/api/usuarios/${targetUserId}`, { 
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } 
+            });
+            if(resp.ok) {
+                const user = await resp.json();
+                atualizarHeaderChat(user.Nome_Completo, user.FotoPerfil);
+                
+                currentPartnerId = targetUserId;
+                currentConversation = null;
+                materialParaTroca = null; // Garante limpeza
+
+                chatMessagesArea.innerHTML = `<div class="text-center text-muted mt-5">Inicie a conversa...</div>`;
+                if(emptyOverlay) emptyOverlay.classList.remove('show');
+                if(chatInputArea) chatInputArea.style.display = 'flex';
+            }
+        } catch(e) { console.error(e); }
     }
+    
+    if(messageInput) messageInput.value = '';
 }
 
-function prepararChatNovaTroca(material) {
-    const donoNome = material.Nome_Dono || "Usuário";
-    const donoFoto = material.Foto_Dono
-        ? `${BASE_URL}/uploads/${material.Foto_Dono}`
-        : 'assets/user.png';
+async function prepararChatParaTroca(material) {
+    // Verifica se já existe chat com o dono do material
+    const chatExistente = conversationsData.find(c => 
+        c.Id_Usuario1_FK == material.Id_Dono || c.Id_Usuario2_FK == material.Id_Dono
+    );
+    
+    materialParaTroca = material; // Define o estado de troca
+    
+    if (chatExistente) {
+        await loadChat(chatExistente.Id_Chat);
+        // Recoloca o materialParaTroca porque loadChat limpou na linha de correção
+        materialParaTroca = material; 
+    } else {
+        const donoNome = material.Nome_Dono || "Usuário";
+        atualizarHeaderChat(donoNome, material.Foto_Dono);
+        currentPartnerId = material.Id_Dono;
+        currentConversation = null;
+        chatMessagesArea.innerHTML = `<div class="text-center text-muted mt-4 mb-4"><small>Negociando: <strong>${material.Titulo}</strong></small></div>`;
+    }
 
-    if (chatHeader) chatHeader.style.display = 'flex';
-    if (chatAvatar) chatAvatar.src = donoFoto;
-    if (chatName) chatName.textContent = donoNome;
-
-    currentPartnerId = material.Id_Dono;
-    currentConversation = null;
-
-    if (chatMessagesArea) chatMessagesArea.innerHTML = `
-        <div class="text-center text-muted mt-4 mb-4">
-            <small>Iniciando negociação sobre: <strong>${material.Titulo}</strong></small>
-        </div>
-    `;
-    if (chatInputArea) chatInputArea.style.display = 'flex'; // GARANTE QUE O INPUT APARECE
     if (messageInput) {
-        messageInput.value = `Olá ${donoNome}, tenho interesse no seu material "${material.Titulo}". Podemos combinar?`;
+        const nomeDono = material.Nome_Dono || "Usuário";
+        messageInput.value = `Olá ${nomeDono}, tenho interesse no seu material "${material.Titulo}". Podemos combinar a troca ou doação?`;
         messageInput.focus();
+        if (chatInputArea) chatInputArea.style.display = 'flex';
+        if (emptyOverlay) emptyOverlay.classList.remove('show');
     }
 }
 
+// === ENVIO DE MENSAGEM ===
 if (sendBtn) sendBtn.addEventListener('click', enviarMensagem);
-if (messageInput) messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') enviarMensagem(); });
+if (messageInput) messageInput.addEventListener('keypress', (e) => { 
+    if (e.key === 'Enter') enviarMensagem(); 
+});
 
 async function enviarMensagem() {
     const texto = messageInput.value.trim();
     if (!texto) return;
-
+    
     if (!currentPartnerId) {
-        // SUBSTITUIÇÃO DE ALERT
-        showToast("Erro: Destinatário não definido. Tente recarregar.", "error");
+        alert("Erro: Destinatário não identificado. Recarregue a página.");
         return;
     }
 
-    if (!currentConversation) {
-        try {
-            const token = localStorage.getItem('token');
-            const myId = localStorage.getItem('usuarioId');
+    const token = localStorage.getItem('token');
+    const myId = localStorage.getItem('usuarioId');
 
+    try {
+        // Se o chat ainda não existe no banco, cria agora
+        if (!currentConversation) {
             const respChat = await fetch(`${BASE_URL}/api/chats`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -292,19 +258,16 @@ async function enviarMensagem() {
             const dadosChat = await respChat.json();
             
             if (respChat.ok || dadosChat.existente) {
-                currentConversation = { id: dadosChat.id };
-                loadConversations();
+                const novoId = dadosChat.id || dadosChat.Id_Chat || dadosChat.insertId;
+                currentConversation = { id: novoId };
+                await loadConversations();
             } else {
-                // SUBSTITUIÇÃO DE ALERT
-                return showToast("Erro ao iniciar chat: " + dadosChat.message, "error");
+                alert("Erro ao criar chat.");
+                return;
             }
-        } catch (e) { console.error(e); return; }
-    }
+        }
 
-    try {
-        const token = localStorage.getItem('token');
-        const myId = localStorage.getItem('usuarioId');
-
+        // Envia a mensagem
         const respMsg = await fetch(`${BASE_URL}/api/mensagens`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -319,59 +282,139 @@ async function enviarMensagem() {
             addMessageToUI(texto, true);
             messageInput.value = '';
 
-            const params = new URLSearchParams(window.location.search);
-            const materialId = params.get('book');
+            // === LÓGICA DE NOTIFICAÇÃO ===
             
-            if (materialId) {
-                await criarRegistroTroca(materialId, currentPartnerId);
+            // Caso 1: É uma negociação de troca
+            if (materialParaTroca) {
+                adicionarDivisorNoChat(`Início da negociação: ${materialParaTroca.Titulo}`);
+                await criarRegistroTroca(materialParaTroca.Id_Material, currentPartnerId);
+                
+                console.log(`Enviando Notificação de TROCA para ID: ${currentPartnerId}`);
+                await criarNotificacao(
+                    parseInt(currentPartnerId), 
+                    "Nova Proposta de Troca", 
+                    `Proposta recebida pelo livro "${materialParaTroca.Titulo}".`, 
+                    "Troca"
+                );
+                
+                // Limpa o objeto após a primeira mensagem para virar conversa normal
+                materialParaTroca = null; 
+                setTimeout(() => loadConversations(), 500);
+            
+            } else {
+                // Caso 2: É uma mensagem comum
+                console.log(`Enviando Notificação de MENSAGEM para ID: ${currentPartnerId}`);
+                await criarNotificacao(
+                    parseInt(currentPartnerId), 
+                    "Nova Mensagem", 
+                    "Você recebeu uma nova mensagem no chat.", 
+                    "Mensagem"
+                );
             }
-            
-            await criarNotificacao(currentPartnerId, "Nova Mensagem", "Você recebeu uma mensagem no chat.", "Mensagem");
-
-        } else {
-            const erro = await respMsg.json();
-            // SUBSTITUIÇÃO DE ALERT
-            showToast("Erro ao enviar: " + erro.message, "error");
         }
-    } catch (e) { console.error("Erro de envio:", e); }
+    } catch (e) { 
+        console.error("Erro envio:", e); 
+    }
+}
+
+function atualizarHeaderChat(nome, foto) {
+    if (chatHeader) chatHeader.style.display = 'flex';
+    if (chatName) chatName.textContent = nome;
+    
+    // Tratamento de imagem para evitar 404
+    if (chatAvatar) {
+        chatAvatar.onerror = function() { this.src = DEFAULT_AVATAR; };
+        chatAvatar.src = foto ? `${BASE_URL}/uploads/${foto}` : DEFAULT_AVATAR;
+    }
+    
+    if (chatInputArea) chatInputArea.style.display = 'flex';
+}
+
+function adicionarDivisorNoChat(texto) {
+    const div = document.createElement('div');
+    div.className = 'text-center my-3';
+    div.innerHTML = `<span class="badge bg-light text-dark border">${texto}</span>`;
+    chatMessagesArea.appendChild(div);
+    chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
 }
 
 function addMessageToUI(text, sent) {
     const div = document.createElement('div');
     div.className = `message-wrapper ${sent ? 'sent' : 'received'}`;
-    div.innerHTML = `<div class="message-bubble"><div class="message-content"><div class="message-text">${text}</div><div class="message-time">Agora</div></div></div>`;
+    div.innerHTML = `
+        <div class="message-bubble">
+            <div class="message-content">
+                <div class="message-text">${text}</div>
+                <div class="message-time">Agora</div>
+            </div>
+        </div>`;
     chatMessagesArea.appendChild(div);
     chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
 }
 
-// Funções auxiliares mantidas iguais (sem alerts)
+function renderMensagens(lista) {
+    if (!chatMessagesArea) return;
+    const myId = localStorage.getItem('usuarioId');
+    
+    chatMessagesArea.innerHTML = lista.map(msg => {
+        const isMe = (msg.Id_Usuario_Remetente_FK == myId);
+        const time = new Date(msg.DataEnvio).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        return `
+            <div class="message-wrapper ${isMe ? 'sent' : 'received'}">
+                <div class="message-bubble">
+                    <div class="message-content">
+                        <div class="message-text">${msg.Conteudo}</div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+    
+    chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+}
+
 async function criarRegistroTroca(materialId, donoId) {
-    const token = localStorage.getItem('token');
-    const meuId = localStorage.getItem('usuarioId');
     try {
         await fetch(`${BASE_URL}/api/trocas`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                Id_Usuario_Solicitante_FK: meuId,
-                Id_Usuario_Doador_FK: donoId,
-                Id_Material_FK: materialId,
-                Status: 'Pendente',
-                Observacoes: 'Iniciado via Chat'
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                Id_Usuario_Solicitante_FK: localStorage.getItem('usuarioId'), 
+                Id_Usuario_Doador_FK: donoId, 
+                Id_Material_FK: materialId, 
+                Status: 'Pendente', 
+                Observacoes: 'Via Chat' 
             })
         });
-    } catch (e) { console.error("Erro ao registrar troca:", e); }
+    } catch (e) { console.error(e); }
 }
 
 async function criarNotificacao(destId, tit, msg, tipo) {
-    const token = localStorage.getItem('token');
+    // Verificação de segurança para o ID
+    if (!destId || isNaN(destId)) {
+        console.error("Tentativa de notificar ID inválido:", destId);
+        return;
+    }
+
     try {
-        await fetch(`${BASE_URL}/api/notificacoes`, {
+        const res = await fetch(`${BASE_URL}/api/notificacoes`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ Id_Usuario_FK: destId, Titulo: tit, Mensagem: msg, Tipo_Notificacao: tipo })
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                Id_Usuario_FK: destId, 
+                Titulo: tit, 
+                Mensagem: msg, 
+                Tipo_Notificacao: tipo 
+            })
         });
-    } catch (e) {}
+        
+        if(res.ok) console.log("Notificação salva no banco com sucesso!");
+        else console.error("Erro API notificação:", await res.text());
+        
+    } catch (e) { 
+        console.error("Erro ao chamar API de notificação:", e); 
+    }
 }
 
 document.getElementById('modalCloseBtn')?.addEventListener('click', () => window.location.href = 'busca.html');

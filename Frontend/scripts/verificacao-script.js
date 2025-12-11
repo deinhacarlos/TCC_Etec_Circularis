@@ -1,19 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Recupera o email salvo no cadastro
-    const email = localStorage.getItem('emailCadastro');
+    // Exibe o e-mail salvo no localStorage
+    const emailSalvo = localStorage.getItem('emailCadastro');
+    const emailDisplay = document.getElementById('emailDisplay');
     
-    // Elemento onde o email será exibido (procurei no seu HTML, é o strong dentro de .form-subtitle)
-    const emailDisplay = document.querySelector('.form-subtitle strong');
-    
-    if (email && emailDisplay) {
-        emailDisplay.textContent = email;
+    if (emailSalvo && emailDisplay) {
+        emailDisplay.textContent = emailSalvo;
     }
 
-    // Lógica do botão Reenviar (Opcional, caso implemente no backend depois)
+    // Botão de Reenviar (apenas visual)
     const btnReenviar = document.getElementById('reenviarEmailBtn');
     if (btnReenviar) {
         btnReenviar.addEventListener('click', () => {
-            showToast('Se você não recebeu o e-mail em alguns minutos, verifique sua caixa de Spam ou tente se cadastrar novamente.');
+            if (window.showToast) {
+                showToast('Verifique sua caixa de Spam ou tente se cadastrar novamente.', 'warning');
+            } else {
+                alert('Verifique sua caixa de Spam.');
+            }
         });
     }
 });

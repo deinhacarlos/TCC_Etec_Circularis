@@ -259,7 +259,24 @@ body {
     border-left-color: var(--error-red);
     background-color: #FFF9F9;
 }
+/* Botão Excluir Todas */
+.btn-delete-all {
+    background: transparent;
+    border: 1px solid var(--error-red);
+    color: var(--error-red);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
+.btn-delete-all:hover {
+    background-color: #FFF5F5; /* Fundo vermelho bem claro */
+    box-shadow: 0 2px 5px rgba(255, 71, 87, 0.2);
+}
 /* Ícones dentro do card */
 .notif-icon-box {
     width: 40px;

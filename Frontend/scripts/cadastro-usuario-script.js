@@ -3,7 +3,6 @@ const API_BASE_URL = 'http://localhost:3000';
 
 // ==================== ELEMENTOS DO DOM ====================
 const registerForm = document.getElementById('registerForm');
-// ... (demais elementos permanecem iguais)
 const fullNameInput = document.getElementById('fullName');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
@@ -39,7 +38,7 @@ function showSuccess(input, errorElement) {
     errorElement.classList.remove('show');
 }
 
-// ==================== VALIDAÇÕES LÓGICAS (IGUAIS) ====================
+// ==================== VALIDAÇÕES LÓGICAS ====================
 function validateName() {
     const name = fullNameInput.value.trim();
     if (name === '') { showError(fullNameInput, nameError, 'Por favor, insira seu nome completo'); return false; }
@@ -128,14 +127,26 @@ registerForm.addEventListener('submit', async (e) => {
                 localStorage.setItem('emailCadastro', emailInput.value.trim());
                 window.location.href = 'verificacao-email.html';
             } else {
-                // SUBSTITUIÇÃO: alert -> showToast
-                showToast(data.message || 'Erro ao realizar cadastro.', 'error');
+                // ==================== MODIFICAÇÃO AQUI ====================
+                // Verifica duplicidade para exibir link de recuperação
+                const errorMsg = data.message ? data.message.toLowerCase() : '';
+                
+                if (response.status === 409 || errorMsg.includes('cadastrado') || errorMsg.includes('existe')) {
+                    // Toast Amarelo com Link HTML
+                    showToast(
+                        'E-mail já cadastrado. Não lembra a senha? <br><a href="recuperar-senha.html" style="color: #333; font-weight: 800; text-decoration: underline; margin-top:5px; display:inline-block;">Clique em recuperar Senha!</a>', 
+                        'warning'
+                    );
+                } else {
+                    // Erro padrão
+                    showToast(data.message || 'Erro ao realizar cadastro.', 'error');
+                }
+                
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = textoOriginal;
             }
         } catch (error) {
             console.error("Erro na requisição:", error);
-            // SUBSTITUIÇÃO: alert -> showToast
             showToast("Erro de conexão. Verifique o servidor.", "error");
             btnSubmit.disabled = false;
             btnSubmit.innerText = textoOriginal;

@@ -1,11 +1,15 @@
 import express from 'express';
 import notificacaoController from '../controllers/notificacaoController.js';
-import authMiddleware from '../middlewares/authMiddleware.js'; // Se estiver usando autenticação
+import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Aplica proteção (opcional, mas recomendado)
+// Aplica proteção (opcional)
 router.use(authMiddleware);
+
+// Criar nova notificação (POST /api/notificacoes)
+router.post('/', notificacaoController.criar);
+// =================================
 
 // Listar
 router.get('/', notificacaoController.listar);

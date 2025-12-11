@@ -1,0 +1,111 @@
+/* Fundo da página */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.confirm-container {
+    text-align: center;
+    width: 100%;
+    padding: 20px;
+}
+
+/* O Cartão Branco Centralizado */
+.card-confirmacao {
+    background: #ffffff;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    transition: transform 0.3s ease;
+}
+
+.card-confirmacao:hover {
+    transform: translateY(-5px);
+}
+
+/* Títulos e Textos */
+.status-title {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #2B2B2B;
+}
+
+.status-text {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Ícones Gigantes */
+.icon-success {
+    font-size: 5rem;
+    color: #5FD068; /* Verde Sucesso */
+    display: block;
+}
+
+.icon-error {
+    font-size: 5rem;
+    color: #FF4757; /* Vermelho Erro */
+    display: block;
+}
+
+.text-success { color: #5FD068 !important; }
+.text-danger { color: #FF4757 !important; }
+
+/* Botões */
+.btn-action {
+    display: inline-block;
+    padding: 12px 40px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-success-custom {
+    background-color: #5FD068;
+    color: white;
+    border: none;
+}
+
+.btn-success-custom:hover {
+    background-color: #4eb556;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(95, 208, 104, 0.3);
+}
+
+.btn-outline-custom {
+    background-color: transparent;
+    border: 2px solid #e0e0e0;
+    color: #666;
+}
+
+.btn-outline-custom:hover {
+    border-color: #666;
+    color: #333;
+}
+
+/* Rodapé */
+.footer-text {
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Spinner customizado */
+.spinner-border {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-width: 4px;
+    color: #6C63FF !important; /* Roxo principal */
+}
