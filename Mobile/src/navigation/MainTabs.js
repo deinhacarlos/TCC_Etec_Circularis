@@ -1,9 +1,12 @@
+// src/navigation/MainTabs.js
+
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import { colors } from '../styles/colors';
 
-// Importação das telas
+// Telas
 import BuscaScreen from '../screens/BuscaScreen';
 import ChatScreen from '../screens/ChatScreen';
 import CadastroMaterialScreen from '../screens/CadastroMaterialScreen';
@@ -14,11 +17,10 @@ const Tab = createBottomTabNavigator();
 export default function MainTabs() {
   return (
     <Tab.Navigator
-      initialRouteName="Busca"
       screenOptions={({ route }) => ({
-        headerShown: false, // Esconde o cabeçalho padrão
-        tabBarActiveTintColor: colors.primaryPurple, // Roxo quando ativo
-        tabBarInactiveTintColor: colors.grayText,    // Cinza quando inativo
+        headerShown: false,
+        tabBarActiveTintColor: colors.primaryPurple,
+        tabBarInactiveTintColor: colors.grayText,
         tabBarStyle: {
           height: 60,
           paddingBottom: 8,
@@ -26,16 +28,15 @@ export default function MainTabs() {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E0E0E0',
-          elevation: 10, // Sombra no Android
+          elevation: 10,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontFamily: 'Nunito-Regular',
           marginBottom: 4,
         },
-        // --- CONFIGURAÇÃO DOS ÍCONES ---
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
+          let iconName = 'ellipse';
 
           if (route.name === 'Busca') {
             iconName = focused ? 'home' : 'home-outline';
@@ -47,31 +48,18 @@ export default function MainTabs() {
             iconName = focused ? 'person' : 'person-outline';
           }
 
-          // Ajuste de tamanho se necessário
-          return <Ionicons name={iconName} size={26} color={color} />;
+          return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
     >
-      <Tab.Screen 
-        name="Busca" 
-        component={BuscaScreen} 
-        options={{ tabBarLabel: 'Início' }} 
+      <Tab.Screen name="Busca" component={BuscaScreen} options={{ title: 'Início' }} />
+      <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Chat' }} />
+      <Tab.Screen
+        name="CadastroMaterial"
+        component={CadastroMaterialScreen}
+        options={{ title: 'Cadastrar' }}
       />
-      <Tab.Screen 
-        name="Chat" 
-        component={ChatScreen} 
-        options={{ tabBarLabel: 'Chat' }}
-      />
-      <Tab.Screen 
-        name="CadastroMaterial" 
-        component={CadastroMaterialScreen} 
-        options={{ tabBarLabel: 'Cadastrar' }} 
-      />
-      <Tab.Screen 
-        name="Perfil" 
-        component={PerfilScreen} 
-        options={{ tabBarLabel: 'Perfil' }} 
-      />
+      <Tab.Screen name="Perfil" component={PerfilScreen} options={{ title: 'Perfil' }} />
     </Tab.Navigator>
   );
 }

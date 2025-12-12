@@ -1,15 +1,16 @@
 // App.js
-import React from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts, Caprasimo_400Regular } from '@expo-google-fonts/caprasimo';
 import { Nunito_400Regular } from '@expo-google-fonts/nunito';
 
-// Importação das Telas
+// Telas
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import CadastroScreen from './src/screens/CadastroScreen';
-import MainTabs from './src/navigation/MainTabs'; // Onde fica o menu inferior
+import MainTabs from './src/navigation/MainTabs';
 import TermosScreen from './src/screens/TermosScreen';
 import PrivacidadeScreen from './src/screens/PrivacidadeScreen';
 import MeusMateriaisScreen from './src/screens/MeusMateriaisScreen';
@@ -19,9 +20,9 @@ import ChatScreen from './src/screens/ChatScreen';
 import CadastroMaterialScreen from './src/screens/CadastroMaterialScreen';
 import RecuperarSenhaScreen from './src/screens/RecuperarSenhaScreen';
 import RedefinirSenhaScreen from './src/screens/RedefinirSenhaScreen';
+import ConfigContaScreen from './src/screens/ConfigContaScreen';
 
-// Se tiver uma tela de recuperação de senha, importe aqui
-// import RecuperarSenhaScreen from './src/screens/RecuperarSenhaScreen';
+import SplashScreen from './src/screens/SplashScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,13 +32,23 @@ export default function App() {
     'Nunito-Regular': Nunito_400Regular,
   });
 
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
   if (!fontsLoaded) return null;
+
+  if (showSplash) {
+    return <SplashScreen />;
+  }
 
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        
-        {/* Tela Inicial (Landing Page) */}
+        {/* Landing */}
         <Stack.Screen
           name="Home"
           component={HomeScreen}
@@ -48,99 +59,72 @@ export default function App() {
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{
-            title: 'Login',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Login' }}
         />
-        <Stack.Screen
-          name="RecuperarSenha"
-          component={RecuperarSenhaScreen}
-          options={{
-            title: 'Recuperar Senha',
-            headerTitleAlign: 'center',
-          }}
-        />
-
         <Stack.Screen
           name="Cadastro"
           component={CadastroScreen}
-          options={{
-            title: 'Cadastro',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Cadastro' }}
         />
 
-        {/* --- ÁREA LOGADA (IMPORTANTE) ---
-           MainTabs contém: Busca (Livros), Chat, CadastroMaterial e Perfil.
-           Essa é a rota que exibe o menu inferior.
-        */}
+        {/* Área logada (menu inferior) */}
         <Stack.Screen
           name="MainTabs"
           component={MainTabs}
           options={{ headerShown: false }}
         />
 
-        {/* Telas Secundárias (que abrem "por cima" do menu ou são modais) */}
-        
+        {/* Telas secundárias */}
         <Stack.Screen
           name="Termos"
           component={TermosScreen}
-          options={{
-            title: 'Termos de Uso',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Termos de uso' }}
         />
-
         <Stack.Screen
           name="Privacidade"
           component={PrivacidadeScreen}
-          options={{
-            title: 'Política de Privacidade',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Política de privacidade' }}
         />
-
         <Stack.Screen
           name="MeusMateriais"
           component={MeusMateriaisScreen}
-          options={{
-            title: 'Meus Materiais',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Meus materiais' }}
         />
-
         <Stack.Screen
           name="Trocas"
           component={TrocasScreen}
-          options={{
-            title: 'Minhas Trocas',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Minhas trocas' }}
         />
-
-        {/* Observação: Perfil e Chat já costumam estar dentro do MainTabs.
-           Deixamos aqui apenas se quiser abrir de forma "avulsa" em algum momento,
-           mas a navegação principal deve ser pelo MainTabs.
-        */}
         <Stack.Screen
           name="Perfil"
           component={PerfilScreen}
-          options={{
-            title: 'Meu Perfil',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Perfil' }}
         />
-
         <Stack.Screen
           name="Chat"
           component={ChatScreen}
-          options={{
-            title: 'Chat',
-            headerTitleAlign: 'center',
-          }}
+          options={{ headerTitle: 'Chat' }}
         />
-
+        <Stack.Screen
+          name="CadastroMaterial"
+          component={CadastroMaterialScreen}
+          options={{ headerTitle: 'Cadastrar material' }}
+        />
+        <Stack.Screen
+          name="RecuperarSenha"
+          component={RecuperarSenhaScreen}
+          options={{ headerTitle: 'Recuperar senha' }}
+        />
+        <Stack.Screen
+          name="RedefinirSenha"
+          component={RedefinirSenhaScreen}
+          options={{ headerTitle: 'Redefinir senha' }}
+        />
+        <Stack.Screen
+          name="ConfigConta"
+          component={ConfigContaScreen}
+          options={{ headerTitle: 'Configurações da conta' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
